@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta, timezone
 import os
 import streamlit as st
+from housing_candidates import build_candidates
 from rent_api import DISTRICTS, SOURCES, RentDataError, fetch_rents, filter_budget, service_keys, KEY_NAMES
 
 def render_rents(conditions):
@@ -54,6 +55,15 @@ def render_rents(conditions):
     if not filtered:
         st.info('이번에 조회한 기록 안에는 예산에 맞는 거래가 없습니다. 조회 기간·지역을 넓힐 수 있으며 현재 매물이 없다는 뜻은 아닙니다.')
         return
+    candidates=build_candidates(result,conditions or {})
+    st.subheader('예산 기준 탐색 후보 동네')
+    st.dataframe([{'법정동':group['dong'],'예산에 맞는 거래(건)':group['count'],
+                   '주택 유형별 건수':', '.join(f'{key} {value}건' for key,value in group['categories'].items()),
+                   '최근 계약일':group['latest']} for group in candidates['groups']],hide_index=True)
+    st.caption('예산에 맞는 조회 거래 건수 내림차순입니다. 종합 추천 순위·현재 매물 수가 아닙니다. 오른쪽 대화에서 “추천해줘”라고 하면 동일한 근거를 안내합니다.')
+    dong=st.selectbox('거래를 살펴볼 동네',['전체']+[group['dong'] for group in candidates['groups']],key='candidate_dong')
+    if dong!='전체':
+        filtered=[row for row in filtered if row['dong']==dong]
     st.dataframe([{'유형':row['category'],'법정동':row['dong'],'건물명':row['name'] or '미제공',
                    '계약일':row['contract_date'],'보증금(만원)':row['deposit'],'월세(만원)':row['monthly_rent'],
                    '면적(㎡)':row['area'],'면적 기준':row['area_type'],'계약 구분':row['contract_type'] or '미제공'}

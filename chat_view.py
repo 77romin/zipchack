@@ -30,7 +30,8 @@ def render_chat():
                 updated, answer, asked, stage = collect_turn(
                     prompt, current, history, os.getenv('GMS_KEY', ''),
                     st.session_state.get('chat_optional_asked', False),
-                    os.getenv('GMS_MODEL', '').strip() or DEFAULT_MODEL)
+                    os.getenv('GMS_MODEL', '').strip() or DEFAULT_MODEL,
+                    rental_result=st.session_state.get('rent_result'))
             st.session_state.chat_optional_asked = asked
             st.session_state.chat_stage = stage
             st.session_state.conversation_conditions = updated
