@@ -52,7 +52,7 @@ if(window.kakao && window.kakao.maps){
         stationInfo.open(map,marker);
       });
     });
-    const facilityColors={parking:'#9333ea',subways:'#0284c7',ev_stations:'#16a34a'};
+    const facilityColors={parking:'#9333ea',subways:'#0284c7',ev_stations:'#16a34a',parks:'#15803d',bikes:'#0d9488'};
     const facilityBounds=new kakao.maps.LatLngBounds();
     (data.facilities || []).forEach(function(facility){
       const position=new kakao.maps.LatLng(facility.latitude,facility.longitude);

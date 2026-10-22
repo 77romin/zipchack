@@ -29,7 +29,7 @@ def parse_neighborhood(payload,district,dong):
         if not (math.isfinite(lat) and math.isfinite(lon) and 37<=lat<=38 and 126<=lon<=128):
             continue
         point={'latitude':lat,'longitude':lon,'name':f'{district} {dong}',
-               'address':item['address_name'],'source_url':SOURCE_URL,
+               'address':item['address_name'],'legal_code':address.get('b_code') if re.fullmatch(DISTRICTS[district]+r'\d{5}',address.get('b_code') or '') else None,'source_url':SOURCE_URL,
                'queried_at':datetime.now(timezone(timedelta(hours=9))).strftime('%Y-%m-%d %H:%M:%S KST')}
         if not any(p['latitude']==lat and p['longitude']==lon for p in matches):
             matches.append(point)
@@ -51,7 +51,22 @@ def resolve_neighborhood(district_code,dong,api_key):
         payload=response.json()
         if not isinstance(payload,dict) or not isinstance(payload.get('documents'),list):
             raise NeighborhoodError('카카오 지역 좌표 응답 형식을 확인하지 못했습니다.')
-        return parse_neighborhood(payload,district,dong)
+        point=parse_neighborhood(payload,district,dong)
+        if not point.get('legal_code'):
+            try:
+                region=requests.get('https://dapi.kakao.com/v2/local/geo/coord2regioncode.json',
+                                    headers={'Authorization':'KakaoAK '+api_key.strip()},
+                                    params={'x':point['longitude'],'y':point['latitude']},timeout=(5,10))
+                region.raise_for_status()
+                matches=[item for item in region.json().get('documents',[]) if item.get('region_type')=='B'
+                         and item.get('region_1depth_name') in {'서울','서울특별시'}
+                         and item.get('region_2depth_name')==district and item.get('region_3depth_name')==dong
+                         and re.fullmatch(district_code+r'\d{5}',item.get('code') or '')]
+                if len(matches)==1:
+                    point['legal_code']=matches[0]['code']
+            except (requests.RequestException,ValueError,TypeError,AttributeError):
+                point['legal_code']=None  # 좌표는 확인됐지만 법정동 코드는 미확인으로 유지한다.
+        return point
     except requests.RequestException:
         raise NeighborhoodError('동네 위치를 조회하지 못했습니다. 카카오 REST 키·사용 권한·네트워크 상태를 확인해주세요.') from None
     except (ValueError,TypeError,KeyError) as error:

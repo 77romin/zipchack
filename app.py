@@ -12,6 +12,8 @@ from city_preferences import preference_controls, render_place_comparison
 from city_match import facility_markers
 from chat_view import render_chat
 from rent_view import render_rents
+from park_data import fetch_parks, load_parks, SOURCE_URL as PARK_SOURCE_URL
+from lifestyle_view import render_lifestyle
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -306,6 +308,7 @@ if city_data:
         st.caption(f"조회 장소 시설 핀 {len(city_facilities)}개 · 직장 선택 시 탐색 반경 안의 좌표만 표시합니다.")
 
 nearby_stations = []
+bike_result=None
 with st.sidebar:
     st.divider()
     st.subheader("따릉이 대여소 위치")
@@ -329,6 +332,29 @@ with st.sidebar:
         except ValueError as error:
             st.warning(str(error))
 
+with st.sidebar:
+    st.divider()
+    st.subheader('공원 위치 자료')
+    if st.button('서울 주요 공원 API 조회',key='fetch_parks'):
+        try:
+            with st.spinner('주요 공원 좌표를 불러옵니다...'):
+                st.session_state.park_data=fetch_parks(os.getenv('SEOUL_OPEN_DATA_API_KEY',''))
+        except ValueError as error:
+            st.session_state.pop('park_data',None)
+            st.warning(str(error))
+    st.link_button('공식 공원 자료 받기',PARK_SOURCE_URL)
+    park_file=st.file_uploader('공원 위치 CSV / XLSX',type=['csv','xlsx'],key='park_file')
+    if park_file is not None:
+        try:
+            park_data=load_parks(park_file.getvalue(),park_file.name)
+        except ValueError as error:
+            park_data=None
+            st.warning(str(error))
+    else:
+        park_data=st.session_state.get('park_data')
+    if park_data:
+        st.caption(f"공원 좌표 {len(park_data['parks'])}개 · 제외/중복 {park_data['skipped']}행")
+
 map_column, chat_column = st.columns([2, 1], gap="large")
 
 with map_column:
@@ -343,6 +369,7 @@ with map_column:
             ], hide_index=True)
 
     neighborhood=render_rents(st.session_state.get("conversation_conditions") or conditions)
+    lifestyle_facilities=render_lifestyle(neighborhood,st.session_state.get("conversation_conditions") or conditions,bike_result,park_data)
     with map_slot:
         st.subheader("추천 지도")
         if not kakao_javascript_key:
@@ -350,7 +377,7 @@ with map_column:
         else:
             radius_km = conditions.get("search_radius_km", 3.0) if conditions else 3.0
             st.iframe(
-                build_map_html(kakao_javascript_key, workplace_location, radius_km, nearby_stations, city_facilities, neighborhood),
+                build_map_html(kakao_javascript_key, workplace_location, radius_km, nearby_stations, city_facilities+lifestyle_facilities, neighborhood),
                 height=530,
             )
         st.caption("파란 원은 직선거리 탐색 범위이며 실제 통근 가능 영역이 아닙니다.")

@@ -38,7 +38,7 @@ class NeighborhoodMapTests(unittest.TestCase):
         self.assertNotIn('secret-rest-key',str(error.exception))
         with patch('neighborhood_api.requests.get',return_value=Mock(json=lambda:payload())) as get:
             resolve_neighborhood('11140','신당동','secret-rest-key')
-        self.assertEqual(get.call_args.kwargs['params']['query'],'서울특별시 중구 신당동')
+        self.assertEqual(get.call_args_list[0].kwargs['params']['query'],'서울특별시 중구 신당동')
 
     def test_map_geometry_and_labels_are_safe(self):
         data={**POINT,'name':'</script><script>bad()</script>','count':2,'month':'202609'}

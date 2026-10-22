@@ -16,7 +16,8 @@ ALIASES = {
     "id": {"대여소번호", "대여소id", "stationid", "id"},
 }
 
-def load_stations(content, filename):
+def load_stations(content, filename, *, aliases=None):
+    aliases = ALIASES if aliases is None else aliases
     if len(content) > 20 * 1024 * 1024:
         raise ValueError("20MB 이하의 대여소 위치 파일을 선택해주세요.")
     try:
@@ -47,8 +48,8 @@ def load_stations(content, filename):
     for index, row in frame.head(15).iterrows():
         candidate = {}
         for col, value in enumerate(row):
-            for key, aliases in ALIASES.items():
-                if normalize(value) in aliases:
+            for key, names in aliases.items():
+                if normalize(value) in names:
                     candidate[key] = col
         if {"name", "latitude", "longitude"} <= candidate.keys():
             columns, header_index = candidate, index
