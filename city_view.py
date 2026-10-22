@@ -76,12 +76,12 @@ def render_citydata(data):
         a.metric("장소 실시간 상권현황",display(commerce.get('level')))
         b.metric("신한카드 결제 건수",display(commerce.get('payment_count'),'건'))
         low,high=commerce.get('amount_min'),commerce.get('amount_max')
-        st.write(f"결제 금액 범위: {display(low,'원')} ~ {display(high,'원')}")
-        st.caption(f"상권 기준: {commerce.get('updated_at') or '미제공'} · 신한카드 내국인 표본으로 전체 매출·소비자·거주민을 대표하지 않습니다.")
+        st.write(f"결제 금액 범위(원본 단위): {display(low)} ~ {display(high)}")
+        st.caption(f"상권 기준: {commerce.get('updated_at') or '미제공'} · 금액은 단위 환산 없이 원본값으로 표시합니다. 신한카드 내국인 표본으로 전체 매출·소비자·거주민을 대표하지 않습니다.")
         rows=commerce.get('industries',[])
         if rows:
             st.dataframe([{"대분류":r['category'],"중분류":r['subcategory'],"현황":r['level'],
-                "결제 건수":r['payment_count'],"금액 하한(원)":r['amount_min'],"금액 상한(원)":r['amount_max'],
+                "결제 건수":r['payment_count'],"금액 하한(원본 단위)":r['amount_min'],"금액 상한(원본 단위)":r['amount_max'],
                 "가맹점 수":r['merchant_count'],"가맹점 기준월":r['merchant_time']} for r in rows],hide_index=True)
         with st.expander("소비 구성 보기 · 인구 구성과 다름"):
             rate_chart(commerce.get('gender_rates',{}),'소비 성별 구성')
