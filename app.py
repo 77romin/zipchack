@@ -3,10 +3,9 @@ from kakao_api import search_workplace
 
 import os
 from pathlib import Path
-from urllib.parse import quote
+from map_view import build_map_html
 
 import streamlit as st
-import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
 # 다른 화면 출력보다 먼저 설정
@@ -63,6 +62,15 @@ with st.sidebar:
             step=5,
         )
 
+        search_radius_km = st.slider(
+            "직장 기준 탐색 반경 (km)",
+            min_value=0.5,
+            max_value=10.0,
+            value=3.0,
+            step=0.5,
+            help="직선거리 기준이며 실제 통근시간과는 다릅니다.",
+        )
+
         st.divider()
         st.subheader("내 생활 취향")
         st.caption("0은 반영하지 않음, 5는 매우 중요입니다.")
@@ -109,6 +117,7 @@ with st.sidebar:
                 "workplace": workplace.strip(),
                 "deposit_max": deposit_max,
                 "rent_max": rent_max,
+                "search_radius_km": search_radius_km,
                 "preferences": {
                     "park": park_importance,
                     "bike": bike_importance,
@@ -117,9 +126,9 @@ with st.sidebar:
                 "preferred_age_range": list(preferred_age_range),
             }
             st.success("조건을 저장했습니다.")
-    
 
-    
+
+
 # 메인 화면
 st.title("나에게 착 맞는 집과 동네")
 st.caption("예산부터 출근길까지, 내 생활을 기준으로 찾아보세요!")
@@ -132,11 +141,17 @@ else:
     st.write(f"**직장:** {conditions['workplace']}")
 
     st.caption(
+        f"직장 기준 탐색 반경: "
+        f"{conditions.get('search_radius_km', 3.0):g}km "
+        f"· 직선거리 기준"
+    )
+
+    st.caption(
         f"월세 탐색 · "
         f"보증금 {conditions['deposit_max']:,}만원 이하 · "
         f"월세 {conditions['rent_max']:,}만원 이하"
     )
-    
+
     preferences = conditions.get("preferences")
 
     if preferences is not None:
@@ -174,6 +189,8 @@ else:
 
 
 workplace_location = None
+if "workplace_search_revision" not in st.session_state:
+    st.session_state.workplace_search_revision = 0
 
 if conditions is not None:
     query = conditions["workplace"]
@@ -194,6 +211,7 @@ if conditions is not None:
         st.subheader("직장 위치 확인")
 
         if st.button("직장 검색", use_container_width=True):
+            st.session_state.workplace_search_revision += 1
             st.session_state.workplace_search["results"] = []
 
             if not kakao_rest_api_key:
@@ -234,7 +252,7 @@ if conditions is not None:
                 format_func=lambda item: (
                     f"{item['name']} · {item['address']}"
                 ),
-                key=f"workplace_selection_{query}",
+                key=f"workplace_selection_{query}_{st.session_state.workplace_search_revision}",
             )
 
             if workplace_location:
@@ -247,94 +265,15 @@ map_column, chat_column = st.columns([2, 1], gap="large")
 
 with map_column:
     st.subheader("추천 지도")
-
     if not kakao_javascript_key:
-        st.warning(
-            ".env에 KAKAO_JAVASCRIPT_KEY를 설정해주세요."
-        )
+        st.warning(".env에 KAKAO_JAVASCRIPT_KEY를 설정해주세요.")
     else:
-        encoded_key = quote(kakao_javascript_key, safe="")
-
-
-        latitude = 37.5665
-        longitude = 126.9780
-        marker_script = ""
-
-        if workplace_location:
-            latitude = workplace_location["latitude"]
-            longitude = workplace_location["longitude"]
-
-            marker_script = """
-                new kakao.maps.Marker({
-                    map: map,
-                    position: map.getCenter()
-                });
-            """
-
-
-        map_html = f"""
-        <!DOCTYPE html>
-        <html lang="ko">
-        <head>
-            <meta charset="utf-8">
-            <style>
-                html, body {{
-                    margin: 0;
-                    padding: 0;
-                }}
-
-                #map {{
-                    width: 100%;
-                    height: 500px;
-                    border-radius: 12px;
-                }}
-            </style>
-        </head>
-        <body>
-            <div id="map"></div>
-
-            <script
-                src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={encoded_key}&autoload=false">
-            </script>
-
-            <script>
-                if (window.kakao && window.kakao.maps) {{
-                    kakao.maps.load(function () {{
-                        const container =
-                            document.getElementById("map");
-
-                        const options = {{
-                            center: new kakao.maps.LatLng(
-                                {latitude}, {longitude}
-                            ),
-                            level: 7
-                        }};
-
-                        const map = new kakao.maps.Map(
-                            container, options
-                        );
-                        
-                        {marker_script}
-
-                        map.addControl(
-                            new kakao.maps.ZoomControl(),
-                            kakao.maps.ControlPosition.RIGHT
-                        );
-                    }});
-                }} else {{
-                    document.getElementById("map").textContent =
-                        "지도를 불러오지 못했습니다. 카카오맵 활성화, JavaScript 키, 등록 도메인을 확인해주세요.";
-                }}
-            </script>
-        </body>
-        </html>
-        """
-
-        components.html(
-            map_html,
-            height=510,
-            scrolling=False,
+        radius_km = conditions.get("search_radius_km", 3.0) if conditions else 3.0
+        st.iframe(
+            build_map_html(kakao_javascript_key, workplace_location, radius_km),
+            height=530,
         )
+    st.caption("파란 원은 직선거리 탐색 범위이며 실제 통근 가능 영역이 아닙니다.")
 
 with chat_column:
     st.subheader("집.착과 대화하기")
