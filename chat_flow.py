@@ -2,6 +2,7 @@
 import re
 from chat_conditions import extract_patch, merge_conditions, next_question, DEFAULT_MODEL
 from housing_candidates import candidate_reply
+from housing_scores import score_reply
 
 def is_finish_request(message):
     text = re.sub(r'[\s,.!?。~]+', '', message)
@@ -24,7 +25,7 @@ def summary(conditions):
         parts.append('희망 주민 연령대: ' + '·'.join(f'{age}대' for age in conditions['preferred_ages']))
     return '\n'.join('- ' + part for part in parts)
 
-def collect_turn(message, current, history, api_key, optional_asked=False, model=DEFAULT_MODEL, rental_result=None):
+def collect_turn(message, current, history, api_key, optional_asked=False, model=DEFAULT_MODEL, rental_result=None, lifestyle_context=None):
     finished = is_finish_request(message)
     # '없음'은 추가 조건이 없다는 뜻이다. 저장한 조건을 지우는 모델 응답을 방지한다.
     patch = {} if finished else extract_patch(message, current, history, api_key, model)
@@ -39,7 +40,10 @@ def collect_turn(message, current, history, api_key, optional_asked=False, model
     if not finished and not patch:
         return updated, '기존 조건은 유지했어요. 바꿀 조건을 구체적으로 알려주거나 “추천해줘”라고 해주세요.', True, 'ready'
     if rental_result is not None:
-        return updated, candidate_reply(rental_result, updated), True, 'candidates'
+        answer=candidate_reply(rental_result,updated)
+        if lifestyle_context is not None:
+            answer+=score_reply(rental_result,updated,lifestyle_context)
+        return updated, answer, True, 'candidates'
     answer = ('추가 조건 없이 지금까지 정리한 조건으로 진행할게요.' if finished else '생활 선호를 포함해 조건을 정리했어요.')
     answer += '\n\n' + summary(updated)
     answer += ('\n\n조건 수집은 완료됐어요. 아직 동네 근거 검색과 종합 추천이 연결되지 않아 '

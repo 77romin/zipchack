@@ -14,6 +14,7 @@ from chat_view import render_chat
 from rent_view import render_rents
 from park_data import fetch_parks, load_parks, SOURCE_URL as PARK_SOURCE_URL
 from lifestyle_view import render_lifestyle
+from housing_score_view import render_housing_scores
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -318,6 +319,7 @@ with st.sidebar:
     if bike_file is not None:
         try:
             bike_result = load_stations(bike_file.getvalue(), bike_file.name)
+            bike_result.update({"source_url":SOURCE_URL,"origin":bike_file.name+" (자료 기준일은 원본 확인)"})
             st.caption(f"위치 {len(bike_result['stations']):,}개 · 제외/중복 {bike_result['skipped']:,}행")
             if workplace_location:
                 nearby_stations = stations_within(
@@ -384,9 +386,12 @@ with map_column:
         if neighborhood:
             st.caption('주황색 이름표는 선택 동네의 대표점입니다. 거래가 있었던 집의 위치나 실제 통근 가능 범위가 아닙니다.')
 
+    score_context=render_housing_scores(
+        st.session_state.get('rent_result'),st.session_state.get('conversation_conditions') or conditions,
+        st.session_state.get('neighborhood_locations',{}),bike_result,park_data)
     if city_data:
         render_citydata(city_data)
     render_place_comparison(city_data, city_preferences)
 
 with chat_column:
-    render_chat()
+    render_chat(score_context)

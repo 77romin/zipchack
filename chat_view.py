@@ -4,7 +4,7 @@ import streamlit as st
 from chat_conditions import ConversationError, map_conditions, DEFAULT_MODEL
 from chat_flow import collect_turn
 
-def render_chat():
+def render_chat(score_context=None):
     st.subheader('집.착과 대화하기')
     st.caption('원하는 조건을 편하게 알려주세요. 빠진 내용은 하나씩 물어볼게요.')
     history = st.session_state.setdefault('housing_chat', [])
@@ -31,7 +31,7 @@ def render_chat():
                     prompt, current, history, os.getenv('GMS_KEY', ''),
                     st.session_state.get('chat_optional_asked', False),
                     os.getenv('GMS_MODEL', '').strip() or DEFAULT_MODEL,
-                    rental_result=st.session_state.get('rent_result'))
+                    rental_result=st.session_state.get('rent_result'),lifestyle_context=score_context)
             st.session_state.chat_optional_asked = asked
             st.session_state.chat_stage = stage
             st.session_state.conversation_conditions = updated

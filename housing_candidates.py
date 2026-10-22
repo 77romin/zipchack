@@ -52,5 +52,5 @@ def candidate_reply(result,conditions):
                f"({example['category']}, {example['contract_date']}) "
                f"[공식 출처]({example['source_url']})")
     text+='\n\n예산에 맞는 조회 거래가 많은 동네 순으로 최대 5곳을 보여드렸어요. 종합 적합도 순위나 현재 매물이 아니에요.'
-    text+=' 공원·따릉이 접근성·거주민 연령·실제 통근시간은 아직 확인하지 못했어요. 해당 희망사항은 유지하고 있어요.'
+    text+=' 공원·따릉이·거주민 연령은 별도 생활환경 확인 결과와 함께 비교해야 해요. 실제 통근시간은 아직 검증되지 않았어요. 해당 희망사항은 유지하고 있어요.'
     return text
