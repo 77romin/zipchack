@@ -64,16 +64,16 @@ class ChatTests(unittest.TestCase):
         from pathlib import Path
         from streamlit.testing.v1 import AppTest
         app = AppTest.from_file(str(Path(__file__).resolve().parents[1]/'app.py'), default_timeout=20).run()
-        with patch('chat_view.extract_patch', return_value={'workplace':'시청', 'deal_type':'월세', 'deposit_max':1000}):
+        with patch('chat_flow.extract_patch', return_value={'workplace':'시청', 'deal_type':'월세', 'deposit_max':1000}):
             app.chat_input[0].set_value('시청 근처 보증금 천').run()
         self.assertEqual(app.session_state['conversation_conditions']['deposit_max'], 1000)
         self.assertIsNone(app.session_state['housing_conditions'])
-        with patch('chat_view.extract_patch', return_value={'rent_max':60, 'commute_mode':'자전거', 'commute_minutes':30}):
+        with patch('chat_flow.extract_patch', return_value={'rent_max':60, 'commute_mode':'자전거', 'commute_minutes':30}):
             app.chat_input[0].set_value('월세60 자전거30분').run()
         self.assertEqual(app.session_state['housing_conditions']['workplace'], '시청')
         self.assertEqual(app.session_state['housing_conditions']['rent_max'], 60)
         self.assertEqual(len(app.exception), 0)
-        with patch('chat_view.extract_patch', side_effect=ConversationError('연결 실패')):
+        with patch('chat_flow.extract_patch', side_effect=ConversationError('연결 실패')):
             app.chat_input[0].set_value('월세50').run()
         self.assertEqual(app.session_state['conversation_conditions']['rent_max'], 60)
         next(button for button in app.button if button.key == 'reset_housing_chat').click().run()

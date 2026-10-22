@@ -1,7 +1,8 @@
 """대화 입력 화면. 누적 조건과 부족한 정보를 사용자에게 보여준다."""
 import os
 import streamlit as st
-from chat_conditions import ConversationError, extract_patch, merge_conditions, next_question, map_conditions, DEFAULT_MODEL
+from chat_conditions import ConversationError, map_conditions, DEFAULT_MODEL
+from chat_flow import collect_turn
 
 def render_chat():
     st.subheader('집.착과 대화하기')
@@ -26,19 +27,12 @@ def render_chat():
     if prompt:
         try:
             with st.spinner('말씀하신 조건을 정리하고 있어요...'):
-                patch = extract_patch(prompt, current, history, os.getenv('GMS_KEY', ''),
-                                      os.getenv('GMS_MODEL', '').strip() or DEFAULT_MODEL)
-                updated = merge_conditions(current, patch)
-            question = next_question(updated)
-            if not patch:
-                answer = '조건을 확실히 이해하지 못했어요. 구체적으로 다시 알려주세요. '
-            else:
-                answer = '말씀하신 조건을 반영했어요. '
-            if question:
-                answer += question
-            else:
-                answer += '기본 조건이 모였어요. 공원·따릉이·주변 연령대 등 더 원하는 점이 있나요? '
-                answer += '실거래가와 동네 근거 검색은 아직 연결 중이라 지금은 최종 추천지를 제시할 수 없어요.'
+                updated, answer, asked, stage = collect_turn(
+                    prompt, current, history, os.getenv('GMS_KEY', ''),
+                    st.session_state.get('chat_optional_asked', False),
+                    os.getenv('GMS_MODEL', '').strip() or DEFAULT_MODEL)
+            st.session_state.chat_optional_asked = asked
+            st.session_state.chat_stage = stage
             st.session_state.conversation_conditions = updated
             mapped = map_conditions(updated)
             if mapped:
@@ -53,6 +47,8 @@ def render_chat():
     if st.button('대화와 대화 조건 초기화', key='reset_housing_chat'):
         st.session_state.housing_chat = []
         st.session_state.conversation_conditions = {}
+        st.session_state.chat_optional_asked = False
+        st.session_state.chat_stage = 'collecting'
         if (st.session_state.get('housing_conditions') or {}).get('source') == 'conversation':
             st.session_state.housing_conditions = None
         st.rerun()
