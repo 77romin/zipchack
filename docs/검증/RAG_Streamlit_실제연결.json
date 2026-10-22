@@ -1,0 +1,18 @@
+{
+  "surface": "Streamlit AppTest 실제 GMS/Chroma/LangGraph 호출",
+  "exception_count": 0,
+  "saved_turns": 1,
+  "answer": "공덕동은 서울특별시 마포구의 동입니다. [1]",
+  "citations": [
+    {
+      "numbers": [
+        1
+      ],
+      "title": "서울특별시 마포구 공덕동",
+      "source_url": "https://www.code.go.kr/stdcode/regCodeL.do",
+      "kind": "metadata",
+      "observed_at": "2026-10-22T14:47:59.206986+09:00"
+    }
+  ],
+  "mode": "mmr"
+}

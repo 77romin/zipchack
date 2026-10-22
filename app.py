@@ -11,6 +11,7 @@ from city_view import render_citydata
 from city_preferences import preference_controls, render_place_comparison
 from city_match import facility_markers
 from chat_view import render_chat
+from rag_view import render_rag
 from rent_view import render_rents
 from park_data import fetch_parks, load_parks, bundled_parks, SOURCE_URL as PARK_SOURCE_URL
 from lifestyle_view import render_lifestyle
@@ -403,3 +404,5 @@ with map_column:
 
 with chat_column:
     render_chat(score_context,commute_context)
+    st.divider()
+    render_rag(neighborhood)
