@@ -37,6 +37,37 @@ class SeoulTests(unittest.TestCase):
             with self.assertRaises(SeoulDataError) as error: fetch_citydata('area','secret-key')
             self.assertNotIn('secret-key',str(error.exception))
 
+    def test_connection_failures_are_not_auth_failures(self):
+        cases = [
+            (requests.ConnectTimeout('secret-key'), '연결 시간 초과'),
+            (requests.ReadTimeout('secret-key'), '응답 대기 시간'),
+            (requests.ConnectionError('secret-key'), 'DNS'),
+        ]
+        for failure, expected in cases:
+            with self.subTest(failure=type(failure).__name__):
+                with patch('seoul_api.requests.get', side_effect=failure):
+                    with self.assertRaises(SeoulDataError) as error:
+                        fetch_citydata('area', 'secret-key')
+                    self.assertIn(expected, str(error.exception))
+                    self.assertNotIn('secret-key', str(error.exception))
+                    self.assertNotIn('인증 실패(INFO-100)', str(error.exception))
+
+    def test_http_error_hides_key_and_reports_status(self):
+        response = Mock(status_code=403)
+        response.raise_for_status.side_effect = requests.HTTPError('secret-key')
+        with patch('seoul_api.requests.get', return_value=response):
+            with self.assertRaises(SeoulDataError) as error:
+                fetch_citydata('area', 'secret-key')
+        self.assertIn('HTTP 403', str(error.exception))
+        self.assertNotIn('secret-key', str(error.exception))
+
+    def test_api_auth_and_server_errors_are_distinct(self):
+        for code in ['INFO-100', 'ERROR-500', 'ERROR-600', 'ERROR-601']:
+            with self.subTest(code=code):
+                with self.assertRaises(SeoulDataError) as error:
+                    parse_citydata(f'<RESULT><CODE>{code}</CODE></RESULT>'.encode())
+                self.assertIn(code, str(error.exception))
+
     def test_success_and_time(self):
         response=Mock(content=FIXTURE)
         with patch('seoul_api.requests.get',return_value=response) as get:

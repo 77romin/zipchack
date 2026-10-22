@@ -20,7 +20,10 @@ def parse_citydata(content):
         raise SeoulDataError("서울시 응답 형식을 확인할 수 없습니다. 잠시 후 다시 조회해주세요.") from None
     code=root.findtext(".//RESULT/CODE") or root.findtext("./CODE")
     if code and code!="INFO-000":
-        messages={"INFO-100":"서울 열린데이터 인증키를 확인해주세요.",
+        messages={"INFO-100":"서울 API가 인증 실패(INFO-100)를 반환했습니다. 서울 열린데이터광장에서 발급한 인증키와 사용 상태를 확인해주세요.",
+                  "ERROR-500":"서울 API 서버 오류(ERROR-500)입니다. 잠시 후 다시 조회해주세요.",
+                  "ERROR-600":"서울 API 데이터베이스 연결 오류(ERROR-600)입니다. 잠시 후 다시 조회해주세요.",
+                  "ERROR-601":"서울 API 데이터베이스 처리 오류(ERROR-601)입니다. 잠시 후 다시 조회해주세요.",
                   "INFO-200":"해당 장소의 데이터가 없습니다. 공식 장소명 또는 코드를 확인해주세요.",
                   "ERROR-300":"공식 장소명 또는 장소코드와 요청 설정을 확인해주세요.",
                   "ERROR-335":"샘플키의 요청 범위는 1~5입니다. 요청 설정을 확인해주세요."}
@@ -68,8 +71,20 @@ def fetch_citydata(area_name,api_key):
     try:
         response=requests.get(url,timeout=(5,20))
         response.raise_for_status()
+    except requests.ConnectTimeout:
+        raise SeoulDataError(
+            "서울 API 서버(openapi.seoul.go.kr:8088)에 연결하지 못했습니다. "
+            "인증 응답을 받기 전의 연결 시간 초과로, 키 오류 여부는 아직 알 수 없습니다. "
+            "다른 네트워크(휴대폰 핫스팟 등)에서 재시도하고, 학교·회사망에서는 8088 포트의 외부 접속 허용 여부를 확인해주세요."
+        ) from None
+    except requests.ReadTimeout:
+        raise SeoulDataError("서울 API 서버의 응답 대기 시간이 초과되었습니다. 잠시 후 다시 조회해주세요. 키 유효성은 확인되지 않았습니다.") from None
+    except requests.HTTPError:
+        raise SeoulDataError(f"서울 API 서버가 HTTP {response.status_code} 오류를 반환했습니다. 인증키 오류로 단정할 수 없으며 서버 상태와 접속 정책을 확인해주세요.") from None
+    except requests.ConnectionError:
+        raise SeoulDataError("서울 API 서버에 연결할 수 없습니다. 네트워크·DNS·방화벽과 서버 상태를 확인해주세요. 키 유효성은 확인되지 않았습니다.") from None
     except requests.RequestException:
-        raise SeoulDataError("서울시 연결에 실패했습니다. 네트워크와 API 서비스 상태를 확인해주세요.") from None
+        raise SeoulDataError("서울 API 요청에 실패했습니다. 네트워크와 API 서비스 상태를 확인해주세요. 키 유효성은 확인되지 않았습니다.") from None
     data=parse_citydata(response.content)
     data["queried_at"]=datetime.now(timezone(timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S KST")
     return data
