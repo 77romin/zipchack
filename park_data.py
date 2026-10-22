@@ -7,8 +7,8 @@ from bike_data import load_stations
 
 SOURCE_URL='https://data.seoul.go.kr/dataList/OA-394/S/1/datasetView.do'
 ALIASES={'name':{'공원명','공원이름','ppark','parkname','name'},
-         'latitude':{'위도','latitude','lat'},'longitude':{'경도','longitude','lon','lng'},
-         'id':{'공원번호','pidx','id'}}
+         'latitude':{'위도','latitude','lat','y좌표wgs84'},'longitude':{'경도','longitude','lon','lng','x좌표wgs84'},
+         'id':{'공원번호','pidx','id','연번'}}
 
 def load_parks(content,filename):
     try:
@@ -63,3 +63,16 @@ def fetch_parks(api_key):
         raise ValueError('서울 공원 API에 연결하지 못했습니다. 네트워크와 서버 상태를 확인하거나 좌표가 포함된 공식 CSV/XLSX를 사용해주세요.') from None
     except (KeyError,TypeError):
         raise ValueError('서울 공원 API 응답 형식을 확인하지 못했습니다.') from None
+
+
+def bundled_parks():
+    """실조회와 구별되는 공식 CSV 스냅샷. 원본 출처/해시/제외 건수 표시."""
+    from pathlib import Path
+    import json
+    folder=Path(__file__).resolve().parent/'data'
+    result=load_parks((folder/'parks_seoul.csv').read_bytes(),'parks_seoul.csv')
+    manifest=json.loads((folder/'parks_seoul.source.json').read_text(encoding='utf-8'))
+    result.update(origin='서울시 공식 CSV 스냅샷 · API 실조회 아님',
+                  queried_at=manifest['downloaded_at'],source_updated_at=manifest['dataset_updated_at'],
+                  skipped=manifest['excluded_rows'],source_url=manifest['source_url'])
+    return result

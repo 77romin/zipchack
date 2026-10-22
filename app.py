@@ -12,7 +12,7 @@ from city_preferences import preference_controls, render_place_comparison
 from city_match import facility_markers
 from chat_view import render_chat
 from rent_view import render_rents
-from park_data import fetch_parks, load_parks, SOURCE_URL as PARK_SOURCE_URL
+from park_data import fetch_parks, load_parks, bundled_parks, SOURCE_URL as PARK_SOURCE_URL
 from lifestyle_view import render_lifestyle
 from housing_score_view import render_housing_scores
 from commute_view import render_commute
@@ -355,6 +355,9 @@ with st.sidebar:
             st.warning(str(error))
     else:
         park_data=st.session_state.get('park_data')
+        if park_data is None:
+            park_data=bundled_parks()
+            st.info('서울시 공식 CSV 스냅샷 사용 · API 실조회 아님 · 확보 2026-10-22 / 데이터셋 갱신 2026-09-23')
     if park_data:
         st.caption(f"공원 좌표 {len(park_data['parks'])}개 · 제외/중복 {park_data['skipped']}행")
 

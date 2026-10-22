@@ -1,0 +1,14 @@
+{
+  "source_url": "https://data.seoul.go.kr/dataList/OA-394/S/1/datasetView.do",
+  "downloaded_at": "2026-10-22",
+  "dataset_updated_at": "2026-09-23",
+  "original_filename": "서울시 주요 공원현황.csv",
+  "original_sha256": "cb40bcbe571651926658e8c5dd6936fb9520348136cc411b139521aab562dd52",
+  "normalized_sha256": "8dbcb7c98fcfe98fd35e2ebe52ce478068b29fbe7a0c3ad1442848428595fd2a",
+  "coordinate_system": "WGS84",
+  "row_count": 132,
+  "excluded_rows": 1,
+  "license": "공공누리 제1유형: 출처표시, 상업적 이용·변경 가능",
+  "processing": "공원명·연번·WGS84 좌표만 보관. 비정상·중복 좌표 제외. GRS80TM 좌표는 사용하지 않음.",
+  "scope": "서울시 주요 공원 목록. 모든 근린·어린이 공원 전수자료 아님. 각 공원의 입구 위치가 아님."
+}

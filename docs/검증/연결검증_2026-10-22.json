@@ -1,0 +1,21 @@
+{
+  "checked_at": "2026-10-22T14:26:14.533387+09:00",
+  "results": [
+    {
+      "service": "parks",
+      "status": "failed",
+      "message": "서울 공원 API에 연결하지 못했습니다. 네트워크와 서버 상태를 확인하거나 좌표가 포함된 공식 CSV/XLSX를 사용해주세요."
+    },
+    {
+      "service": "citydata",
+      "status": "failed",
+      "message": "서울 API 서버(openapi.seoul.go.kr:8088)에 연결하지 못했습니다. 인증 응답을 받기 전의 연결 시간 초과로, 키 오류 여부는 아직 알 수 없습니다. 다른 네트워크(휴대폰 핫스팟 등)에서 재시도하고, 학교·회사망에서는 8088 포트의 외부 접속 허용 여부를 확인해주세요."
+    },
+    {
+      "service": "residents",
+      "status": "success",
+      "count": 62712,
+      "observed_at": "202609"
+    }
+  ]
+}
