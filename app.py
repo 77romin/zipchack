@@ -1,4 +1,10 @@
-import streamlit as st 
+import os
+from pathlib import Path
+from urllib.parse import quote
+
+import streamlit as st
+import streamlit.components.v1 as components
+from dotenv import load_dotenv
 
 # 다른 화면 출력보다 먼저 설정
 st.set_page_config(
@@ -6,6 +12,16 @@ st.set_page_config(
     page_icon="🏠",
     layout="wide",
 )
+
+
+# app.py와 같은 폴더에 있는 .env를 읽습니다.
+env_path = Path(__file__).resolve().parent / ".env"
+load_dotenv(env_path)
+
+kakao_javascript_key = os.getenv(
+    "KAKAO_JAVASCRIPT_KEY", ""
+).strip()
+
 
 # 입력한 조건을 보관할 공간
 if "housing_conditions" not in st.session_state:
@@ -80,8 +96,74 @@ map_column, chat_column = st.columns([2, 1], gap="large")
 with map_column:
     st.subheader("추천 지도")
 
-    with st.container(border=True, height=500):
-        st.info("이곳에 카카오 지도를 연결할 예정입니다.")
+    if not kakao_javascript_key:
+        st.warning(
+            ".env에 KAKAO_JAVASCRIPT_KEY를 설정해주세요."
+        )
+    else:
+        encoded_key = quote(kakao_javascript_key, safe="")
+
+        map_html = f"""
+        <!DOCTYPE html>
+        <html lang="ko">
+        <head>
+            <meta charset="utf-8">
+            <style>
+                html, body {{
+                    margin: 0;
+                    padding: 0;
+                }}
+
+                #map {{
+                    width: 100%;
+                    height: 500px;
+                    border-radius: 12px;
+                }}
+            </style>
+        </head>
+        <body>
+            <div id="map"></div>
+
+            <script
+                src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={encoded_key}&autoload=false">
+            </script>
+
+            <script>
+                if (window.kakao && window.kakao.maps) {{
+                    kakao.maps.load(function () {{
+                        const container =
+                            document.getElementById("map");
+
+                        const options = {{
+                            center: new kakao.maps.LatLng(
+                                37.5665, 126.9780
+                            ),
+                            level: 7
+                        }};
+
+                        const map = new kakao.maps.Map(
+                            container, options
+                        );
+
+                        map.addControl(
+                            new kakao.maps.ZoomControl(),
+                            kakao.maps.ControlPosition.RIGHT
+                        );
+                    }});
+                }} else {{
+                    document.getElementById("map").textContent =
+                        "지도를 불러오지 못했습니다. 카카오맵 활성화, JavaScript 키, 등록 도메인을 확인해주세요.";
+                }}
+            </script>
+        </body>
+        </html>
+        """
+
+        components.html(
+            map_html,
+            height=510,
+            scrolling=False,
+        )
 
 with chat_column:
     st.subheader("집.착과 대화하기")
