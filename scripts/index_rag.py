@@ -1,4 +1,4 @@
-"""공식 공원 외부 자료 색인. --dry-run은 임베딩 요청 없이 준비 결과만 확인."""
+"""공식 동네 메타데이터·공원·위키 문서 색인. --dry-run은 임베딩 요청 없이 준비 결과만 확인."""
 import argparse,json,sys
 from pathlib import Path
 from datetime import datetime,timezone
@@ -6,6 +6,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from dotenv import dotenv_values
 from rag_index import Source,Index,GmsEmbeddings,park_sources,chunks
+from neighborhood_data import neighborhood_sources,wiki_sources
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
@@ -16,7 +17,7 @@ def main():
     parser.add_argument('--overlap',type=int,default=200)
     args=parser.parse_args()
     try:
-        sources=list(park_sources())
+        sources=list(park_sources())+list(neighborhood_sources())+list(wiki_sources())
         if args.items:
             items=[Source(**json.loads(line)) for line in args.items.read_text(encoding='utf-8').splitlines() if line.strip()]
             if any(item.kind!='metadata' for item in items):

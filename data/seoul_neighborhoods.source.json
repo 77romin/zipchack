@@ -1,0 +1,14 @@
+{
+  "source_url": "https://www.code.go.kr/stdcode/regCodeL.do",
+  "download_url": "https://www.code.go.kr/etc/codeFullDown.do",
+  "download_method": "POST codeseId=법정동코드",
+  "downloaded_at": "2026-10-22T14:47:59.206986+09:00",
+  "original_sha256": "44a3fe4cacf88ce98e35fb883807d2725b589f427ff4d73ee40b914d1286bacd",
+  "normalized_sha256": "1aebcad1559175d55fcf6e0f5300f0178beb3028c52762f26cfbc9d580ee53fa",
+  "row_count": 467,
+  "district_count": 25,
+  "selection": "법정동코드 11 시작, 폐지여부 존재, 서울특별시 자치구 법정동 3단계 이름",
+  "scope": "법정동 식별 코드 목록. 가격·인구·경계 자료가 아님.",
+  "attribution": "행정안전부 행정표준코드관리시스템",
+  "usage_reference": "https://www.data.go.kr/data/15077871/openapi.do"
+}

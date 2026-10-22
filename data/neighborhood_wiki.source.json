@@ -1,0 +1,11 @@
+{
+  "source_url": "https://ko.wikipedia.org/",
+  "license": "CC BY-SA 4.0",
+  "terms_url": "https://foundation.wikimedia.org/wiki/Policy:Terms_of_Use",
+  "downloaded_at": "2026-10-22T14:53:04.371467+09:00",
+  "row_count": 5,
+  "normalized_sha256": "8f4c85b0ac03f81f069c6bd78b8c095e59ccf156696b185d5a8ef3f629e6c667",
+  "transformation": "MediaWiki plaintext extract; full article, no minimum-length filtering",
+  "scope": "검증된 초기 자체 문서 5건. 나머지 법정동 문서는 아직 수집하지 않음.",
+  "attribution": "각 문서의 attribution·원문 판 링크 참조. 재배포 시 CC BY-SA 4.0 준수."
+}

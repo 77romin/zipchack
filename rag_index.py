@@ -15,11 +15,14 @@ class Source:
     source_url: str
     observed_at: str
     kind: str = 'external'
+    license: str = ''
+    revision_id: str = ''
+    attribution: str = ''
 
 def chunks(source, size=1000, overlap=200):
     if not 0 <= overlap < size:
         raise ValueError('청크 크기는 양수이고 중복 길이보다 커야 합니다.')
-    if source.kind not in {'metadata','external'} or any(not isinstance(v,str) or not v.strip() for v in vars(source).values()):
+    if source.kind not in {'metadata','external'} or any(not isinstance(getattr(source,k),str) or not getattr(source,k).strip() for k in ['item_id','document_id','title','text','source_url','observed_at','kind']):
         raise ValueError('항목·문서 식별자, 본문, 출처, 기준일이 필요합니다.')
     texts=[source.text] if source.kind=='metadata' else RecursiveCharacterTextSplitter(
         chunk_size=size,chunk_overlap=overlap,separators=['\n\n','\n','。','. ',' ','']).split_text(source.text)
@@ -27,8 +30,9 @@ def chunks(source, size=1000, overlap=200):
     return [{'id':sha256(f'{namespace}:{i}'.encode()).hexdigest(), 'text':text,
              'metadata':{'item_id':source.item_id,'document_id':source.document_id,'kind':source.kind,
                          'title':source.title,'source_url':source.source_url,'observed_at':source.observed_at,
+                         **{key:getattr(source,key) for key in ['license','revision_id','attribution'] if getattr(source,key)},
                          'chunk_index':i,'chunk_size':size,'chunk_overlap':overlap,
-                         'fingerprint':sha256(json.dumps([vars(source),size,overlap,text],sort_keys=True,ensure_ascii=False).encode()).hexdigest()}}
+                         'fingerprint':sha256(json.dumps([{key:value for key,value in vars(source).items() if value},size,overlap,text],sort_keys=True,ensure_ascii=False).encode()).hexdigest()}}
             for i,text in enumerate(texts)]
 
 class GmsEmbeddings:
