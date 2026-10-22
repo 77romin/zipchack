@@ -4,6 +4,7 @@ from kakao_api import search_workplace
 import os
 from pathlib import Path
 from map_view import build_map_html
+from map_explore import map_card,read_boundaries
 from bike_data import load_stations, SOURCE_URL
 from geo import stations_within
 from seoul_api import fetch_citydata, SeoulDataError
@@ -26,6 +27,7 @@ st.set_page_config(
     page_title="집.착",
     page_icon="🏠",
     layout="wide",
+    initial_sidebar_state="collapsed",
 )
 
 
@@ -362,6 +364,15 @@ with st.sidebar:
     if park_data:
         st.caption(f"공원 좌표 {len(park_data['parks'])}개 · 제외/중복 {park_data['skipped']}행")
 
+boundaries={}
+with st.sidebar:
+    with st.expander('지도 경계 자료 (선택)'):
+        st.caption('WGS84 GeoJSON, properties.legal_code에 법정동 10자리 코드. 행정동 경계를 법정동에 붙이지 마세요. 자료가 없으면 대표점 500m 범위를 표시합니다.')
+        boundary_file=st.file_uploader('법정동 경계 GeoJSON',type=['geojson','json'],key='boundary_file')
+        if boundary_file:
+            try:boundaries=read_boundaries(boundary_file.getvalue())
+            except (ValueError,KeyError,TypeError):st.warning('경계 파일의 코드·좌표·형식을 확인해주세요.')
+
 map_column, chat_column = st.columns([2, 1], gap="large")
 
 with map_column:
@@ -383,9 +394,11 @@ with map_column:
             st.warning(".env에 KAKAO_JAVASCRIPT_KEY를 설정해주세요.")
         else:
             radius_km = conditions.get("search_radius_km", 3.0) if conditions else 3.0
+            card=map_card(neighborhood,st.session_state.get('rent_result'),st.session_state.get('conversation_conditions') or conditions,
+                          bike_result,st.session_state.get('resident_data',{}),st.session_state.get('resident_month'))
             st.iframe(
-                build_map_html(kakao_javascript_key, workplace_location, radius_km, nearby_stations, city_facilities+lifestyle_facilities, neighborhood),
-                height=530,
+                build_map_html(kakao_javascript_key, workplace_location, radius_km, nearby_stations, city_facilities+lifestyle_facilities, neighborhood,card,boundaries.get((neighborhood or {}).get('legal_code'))),
+                height=575,
             )
         st.caption("파란 원은 직선거리 탐색 범위이며 실제 통근 가능 영역이 아닙니다.")
         if neighborhood:

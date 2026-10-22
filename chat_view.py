@@ -7,13 +7,13 @@ from rent_api import service_keys
 
 def render_chat(score_context=None,commute_context=None):
     st.subheader('집.착과 대화하기')
-    st.caption('원하는 조건을 편하게 알려주세요. 빠진 내용은 하나씩 물어볼게요.')
+    st.caption('질문 순서와 관계없이 원하는 조건부터 말해주세요. 직장·통근시간·생활 선호는 나중에 추가해도 됩니다.')
     history = st.session_state.setdefault('housing_chat', [])
     current = st.session_state.setdefault('conversation_conditions', {})
     with st.container(border=True, height=500):
         if not history:
             with st.chat_message('assistant'):
-                st.write('어떤 집과 동네를 찾고 있나요? 직장, 예산, 출근 방법부터 알려주세요.')
+                st.write('어떤 집과 동네를 찾고 있나요? 예산이나 관심 지역 등 아는 조건부터 편하게 알려주세요.')
         for item in history:
             with st.chat_message(item['role']):
                 st.write(item['content'])

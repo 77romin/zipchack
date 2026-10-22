@@ -11,11 +11,13 @@ def is_finish_request(message):
         r'(?:알려줘|알려주세요|추천해줘|추천해주세요|추천해|찾아줘|진행해|진행해주세요)?', text)) and bool(text)
 
 def summary(conditions):
-    parts = [f"직장 {conditions['workplace']}", conditions['deal_type']]
+    parts = [conditions['deal_type']]
+    if conditions.get('workplace'):parts.insert(0,f"직장 {conditions['workplace']}")
     for key, label in [('deposit_max','보증금'), ('rent_max','월세'), ('purchase_max','매매가')]:
         if key in conditions:
             parts.append(f"{label} {conditions[key]:,}만원 이하")
-    parts.append(f"{conditions['commute_mode']} 편도 {conditions['commute_minutes']}분 이내 희망")
+    if conditions.get('commute_mode') and conditions.get('commute_minutes'):
+        parts.append(f"{conditions['commute_mode']} 편도 {conditions['commute_minutes']}분 이내 희망")
     names = {'park':'공원', 'bike':'따릉이 대여소', 'subway':'지하철', 'parking':'주차장',
              'ev':'전기차 충전소', 'air':'대기환경', 'commerce':'상권', 'age':'희망 연령 구성'}
     selected = [names[key] for key,value in conditions.get('preferences', {}).items() if value > 0]
@@ -35,8 +37,6 @@ def collect_turn(message, current, history, api_key, optional_asked=False, model
         prefix = '말씀하신 조건을 반영했어요. ' if patch else '추천 조건을 먼저 확인할게요. '
         return updated, prefix + question, optional_asked, 'collecting'
     has_optional = bool(updated.get('preferences') or updated.get('preferred_ages'))
-    if not finished and not has_optional and not optional_asked:
-        return updated, '기본 조건이 모였어요. 공원·따릉이·희망 주민 연령대 등 더 원하는 점이 있나요? 없으면 “없음, 추천해줘”라고 해주세요.', True, 'preferences'
     if not finished and not patch:
         return updated, '기존 조건은 유지했어요. 바꿀 조건을 구체적으로 알려주거나 “추천해줘”라고 해주세요.', True, 'ready'
     if rental_result is not None:

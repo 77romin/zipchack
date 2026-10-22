@@ -109,6 +109,10 @@ def merge_conditions(current, patch):
     return result
 
 def next_question(conditions):
+    # 예산 탐색은 직장·통근 희망이 없어도 가능하다. 해당 정보는 나중에 보완한다.
+    deal=conditions.get('deal_type')
+    if deal in {'월세','전세'} and 'deposit_max' in conditions and (deal=='전세' or 'rent_max' in conditions):
+        return None
     questions = [('workplace', '출근할 직장 주소나 장소명을 알려주세요.'),
                  ('deal_type', '월세·전세·매매 중 어떤 형태를 찾고 있나요?')]
     deal = conditions.get('deal_type')
@@ -152,7 +156,7 @@ def extract_patch(message, current, history, api_key, model=DEFAULT_MODEL):
         raise ConversationError('AI 응답에서 조건을 읽지 못했습니다. 다시 입력해주세요. 기존 조건은 유지했습니다.') from None
 
 def map_conditions(conditions):
-    if conditions.get('deal_type') != '월세' or next_question(conditions):
+    if conditions.get('deal_type') != '월세' or next_question(conditions) or not conditions.get('workplace'):
         return None
     ages = conditions.get('preferred_ages', [])
     weights = conditions.get('preferences', {})

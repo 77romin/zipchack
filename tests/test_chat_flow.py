@@ -9,7 +9,7 @@ class ChatFlowTests(unittest.TestCase):
     def test_repeated_preference_question_regression(self):
         with patch('chat_flow.extract_patch', return_value=BASE):
             current, reply, asked, stage = collect_turn('시청 출근 월세70', {}, [], 'test')
-        self.assertEqual(stage, 'preferences')
+        self.assertEqual(stage, 'waiting_for_data')
         self.assertTrue(asked)
         with patch('chat_flow.extract_patch', return_value={'preferences':{'park':3,'bike':3,'age':3}, 'preferred_ages':[20,30]}):
             current, reply, asked, stage = collect_turn('공원 따릉이 20~30대 선호', current, [], 'test', asked)
