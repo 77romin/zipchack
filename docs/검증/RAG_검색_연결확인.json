@@ -1,0 +1,117 @@
+{
+  "purpose": "실제 연결 확인. 품질·속도 비교 실험 결과가 아님. 각 방식 1회 실행.",
+  "results": [
+    {
+      "item_id": "1144010200",
+      "mode": "similarity",
+      "k": 2,
+      "fetch_k": 10,
+      "weight": 0.5,
+      "candidate_count": 1,
+      "external_count": 1,
+      "evidence": [
+        {
+          "id": "fc5a7a01298ccaa80344dd3dd5dc6e82f429c875f48d4608f67aa2a3ad1ce0a1",
+          "text": "동네명: 공덕동\n전체 이름: 서울특별시 마포구 공덕동\n법정동 코드: 1144010200\n자치구: 마포구\n단위: 법정동\n공식 코드 목록 상태: 존재\n이 목록은 행정동 경계·인구·가격·통근시간·주거 적합도를 제공하지 않습니다.",
+          "metadata": {
+            "chunk_index": 0,
+            "chunk_size": 1000,
+            "observed_at": "2026-10-22T14:47:59.206986+09:00",
+            "title": "서울특별시 마포구 공덕동",
+            "source_url": "https://www.code.go.kr/stdcode/regCodeL.do",
+            "chunk_overlap": 200,
+            "item_id": "1144010200",
+            "kind": "metadata",
+            "fingerprint": "f9b442239508e20c75e2dcf7ef5e862627b30de2fcbd78bced9fb5a1b20f7979",
+            "document_id": "legal-dong"
+          },
+          "citation": 1
+        },
+        {
+          "id": "11d4155936b5c8b72835ef48dd7754a36cf7ac600cfcbd5e151c127edc185f0d",
+          "text": "공덕동(孔德洞)은 서울특별시 마포구의 행정동, 법정동이다. 공덕역을 중심으로 업무지구를 형성하고 있다.\n\n\n== 역사 ==\n공덕이라는 동명의 유래는 확실치 않으나, 한자의 공덕(孔德)의 의미보다는 우리말의 ‘큰더기’에서 유래된 것으로 보인다. 즉 우리말로 조금 높은 고원의 평평한 곳의 ‘더기’ 또는 ‘덕’, ‘언덕’으로 일컬었는데 위에 보인 공덕리 일대는 대개 만리현, 아현, 대현 고갯마루에서 서남쪽으로 펼쳐 내려간 언덕길 지대이기 때문에 이 지역을 옛날에 우리말로 ‘큰더기’, ‘큰덕’으로 전칭되던 것이 당시 한자음이 비슷한 공덕으로 옮겨지게 된 것으로 여겨진다. 한편, 공덕동의 유래에 대해서 옛 지명 공덕리에서 유래되었다는 설도 있다.\n\n\n== 법정동 ==\n공덕동\n아현동\n신공덕동\n\n\n== 교육 ==\n소의초등학교\n공덕초등학교\n\n\n== 교통 ==\n공덕역 : ● 수도권 전철 5호선, ● 서울 지하철 6호선, ● 수도권 전철 경의·중앙선, ● 인천국제공항철도 4개 노선 환승이 가능하다. 전국에서 4개 노선 환승이 가능한 역은 공덕역, 서울역, 왕십리역 3곳뿐이다.\n\n\n== 아파트 ==\n\n\n== 각주 ==\n\n\n== 외부 링크 ==\n마포구 공덕동 주민센터 보관됨 2017-06-28 - 웨이백 머신",
+          "metadata": {
+            "item_id": "1144010200",
+            "chunk_size": 1000,
+            "revision_id": "41433344",
+            "attribution": "한국어 위키백과 기여자, 공덕동; https://ko.wikipedia.org/w/index.php?title=%EA%B3%B5%EB%8D%95%EB%8F%99&action=history",
+            "chunk_index": 0,
+            "source_url": "https://ko.wikipedia.org/w/index.php?oldid=41433344",
+            "document_id": "wikipedia:803942",
+            "kind": "external",
+            "title": "공덕동",
+            "fingerprint": "2696ac213ebfbf31d22a90bb8384cbfa805c95d7d96a53fc5171f39d8c8e61f3",
+            "observed_at": "2026-03-02T12:11:57Z",
+            "license": "CC BY-SA 4.0",
+            "chunk_overlap": 200
+          },
+          "cosine": 0.5836399171355061,
+          "citation": 2
+        }
+      ],
+      "timings": {
+        "embedding_ms": 4270.263099926524,
+        "vector_ms": 3.459800034761429,
+        "selection_ms": 0.5026999861001968,
+        "total_ms": 4350.717000081204
+      },
+      "notice": null
+    },
+    {
+      "item_id": "1144010200",
+      "mode": "mmr",
+      "k": 2,
+      "fetch_k": 10,
+      "weight": 0.5,
+      "candidate_count": 1,
+      "external_count": 1,
+      "evidence": [
+        {
+          "id": "fc5a7a01298ccaa80344dd3dd5dc6e82f429c875f48d4608f67aa2a3ad1ce0a1",
+          "text": "동네명: 공덕동\n전체 이름: 서울특별시 마포구 공덕동\n법정동 코드: 1144010200\n자치구: 마포구\n단위: 법정동\n공식 코드 목록 상태: 존재\n이 목록은 행정동 경계·인구·가격·통근시간·주거 적합도를 제공하지 않습니다.",
+          "metadata": {
+            "document_id": "legal-dong",
+            "source_url": "https://www.code.go.kr/stdcode/regCodeL.do",
+            "observed_at": "2026-10-22T14:47:59.206986+09:00",
+            "title": "서울특별시 마포구 공덕동",
+            "item_id": "1144010200",
+            "chunk_overlap": 200,
+            "fingerprint": "f9b442239508e20c75e2dcf7ef5e862627b30de2fcbd78bced9fb5a1b20f7979",
+            "chunk_size": 1000,
+            "kind": "metadata",
+            "chunk_index": 0
+          },
+          "citation": 1
+        },
+        {
+          "id": "11d4155936b5c8b72835ef48dd7754a36cf7ac600cfcbd5e151c127edc185f0d",
+          "text": "공덕동(孔德洞)은 서울특별시 마포구의 행정동, 법정동이다. 공덕역을 중심으로 업무지구를 형성하고 있다.\n\n\n== 역사 ==\n공덕이라는 동명의 유래는 확실치 않으나, 한자의 공덕(孔德)의 의미보다는 우리말의 ‘큰더기’에서 유래된 것으로 보인다. 즉 우리말로 조금 높은 고원의 평평한 곳의 ‘더기’ 또는 ‘덕’, ‘언덕’으로 일컬었는데 위에 보인 공덕리 일대는 대개 만리현, 아현, 대현 고갯마루에서 서남쪽으로 펼쳐 내려간 언덕길 지대이기 때문에 이 지역을 옛날에 우리말로 ‘큰더기’, ‘큰덕’으로 전칭되던 것이 당시 한자음이 비슷한 공덕으로 옮겨지게 된 것으로 여겨진다. 한편, 공덕동의 유래에 대해서 옛 지명 공덕리에서 유래되었다는 설도 있다.\n\n\n== 법정동 ==\n공덕동\n아현동\n신공덕동\n\n\n== 교육 ==\n소의초등학교\n공덕초등학교\n\n\n== 교통 ==\n공덕역 : ● 수도권 전철 5호선, ● 서울 지하철 6호선, ● 수도권 전철 경의·중앙선, ● 인천국제공항철도 4개 노선 환승이 가능하다. 전국에서 4개 노선 환승이 가능한 역은 공덕역, 서울역, 왕십리역 3곳뿐이다.\n\n\n== 아파트 ==\n\n\n== 각주 ==\n\n\n== 외부 링크 ==\n마포구 공덕동 주민센터 보관됨 2017-06-28 - 웨이백 머신",
+          "metadata": {
+            "revision_id": "41433344",
+            "item_id": "1144010200",
+            "chunk_overlap": 200,
+            "fingerprint": "2696ac213ebfbf31d22a90bb8384cbfa805c95d7d96a53fc5171f39d8c8e61f3",
+            "document_id": "wikipedia:803942",
+            "observed_at": "2026-03-02T12:11:57Z",
+            "chunk_index": 0,
+            "kind": "external",
+            "chunk_size": 1000,
+            "title": "공덕동",
+            "attribution": "한국어 위키백과 기여자, 공덕동; https://ko.wikipedia.org/w/index.php?title=%EA%B3%B5%EB%8D%95%EB%8F%99&action=history",
+            "source_url": "https://ko.wikipedia.org/w/index.php?oldid=41433344",
+            "license": "CC BY-SA 4.0"
+          },
+          "cosine": 0.5836399171355061,
+          "citation": 2
+        }
+      ],
+      "timings": {
+        "embedding_ms": 684.6990999765694,
+        "vector_ms": 2.016599988564849,
+        "selection_ms": 0.40360004641115665,
+        "total_ms": 688.4408999467269
+      },
+      "notice": null
+    }
+  ]
+}
