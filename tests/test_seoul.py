@@ -21,7 +21,7 @@ class SeoulTests(unittest.TestCase):
         self.assertIsNone(data['pm25'])
         self.assertIsNone(data['age_rates']['30대'])
         self.assertEqual(data['replacement'],'Y')
-        self.assertEqual(data['temperature'],'-2')
+        self.assertEqual(data['temperature'],-2)
 
     def test_error_and_invalid_xml(self):
         for xml in [b'<RESULT><CODE>INFO-100</CODE></RESULT>',b'<broken',b'<root/>']:

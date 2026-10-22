@@ -4,6 +4,7 @@ from urllib.parse import quote
 import math
 import xml.etree.ElementTree as ET
 import requests
+from city_schema import parse_details
 
 SOURCE_URL = "https://data.seoul.go.kr/dataList/OA-21285/A/1/datasetView.do"
 
@@ -22,7 +23,7 @@ def parse_citydata(content):
         messages={"INFO-100":"서울 열린데이터 인증키를 확인해주세요.",
                   "INFO-200":"해당 장소의 데이터가 없습니다. 공식 장소명 또는 코드를 확인해주세요.",
                   "ERROR-300":"공식 장소명 또는 장소코드와 요청 설정을 확인해주세요.",
-                  "ERROR-335":"오늘의 조회 한도를 확인해주세요."}
+                  "ERROR-335":"샘플키의 요청 범위는 1~5입니다. 요청 설정을 확인해주세요."}
         raise SeoulDataError(messages.get(code,"도시데이터를 가져오지 못했습니다. 인증키·조회 한도·장소명을 확인해주세요."))
     city=root if root.tag=="CITYDATA" else root.find(".//CITYDATA")
     if city is None:
@@ -38,7 +39,7 @@ def parse_citydata(content):
             return result if math.isfinite(result) and result>=0 else None
         except (ValueError,AttributeError):
             return None
-    return {"area_name":text("AREA_NM"),"area_code":text("AREA_CD"),
+    data = {"area_name":text("AREA_NM"),"area_code":text("AREA_CD"),
             "population_min":number("AREA_PPLTN_MIN"),"population_max":number("AREA_PPLTN_MAX"),
             "congestion":text("AREA_CONGEST_LVL"),"population_time":text("PPLTN_TIME"),
             "resident_rate":number("RESNT_PPLTN_RATE"),"nonresident_rate":number("NON_RESNT_PPLTN_RATE"),
@@ -50,6 +51,11 @@ def parse_citydata(content):
             "temperature":number("TEMP") if text("TEMP") is None else text("TEMP"),
             "pm10":number("PM10"),"pm25":number("PM25"),"weather_time":text("WEATHER_TIME"),
             "source_url":SOURCE_URL}
+    data.update(parse_details(city))
+    # 비율 필드는 결측·오류를 0이나 유효한 비율로 바꾸지 않는다.
+    for label,value in data["age_rates"].items():
+        if value is not None and value>100: data["age_rates"][label]=None
+    return data
 
 def fetch_citydata(area_name,api_key):
     area_name=area_name.strip()
