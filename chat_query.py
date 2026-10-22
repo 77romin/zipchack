@@ -5,6 +5,7 @@ from chat_conditions import next_question,DEFAULT_MODEL
 from rent_api import DISTRICTS,fetch_rents,RentDataError
 from housing_candidates import candidate_reply
 from housing_scores import score_reply
+from commute import commute_reply
 
 QUERY_FIELDS={'district','deal_month','housing_types'}
 
@@ -30,7 +31,7 @@ def same_query(result,conditions):
             and {status['category'] for status in result.get('statuses',[])}==set(conditions['housing_types']))
 
 def run_chat_turn(message,current,history,api_key,keys,optional_asked=False,model=DEFAULT_MODEL,
-                  rental_result=None,lifestyle_context=None,cache=None):
+                  rental_result=None,lifestyle_context=None,cache=None,commute_context=None):
     cache=dict(cache or {})
     refresh=refresh_requested(message)
     updated,answer,asked,stage=collect_turn('추천해줘' if refresh else message,current,history,api_key,
@@ -74,5 +75,7 @@ def run_chat_turn(message,current,history,api_key,keys,optional_asked=False,mode
     answer+=candidate_reply(result,updated)
     if lifestyle_context is not None:
         answer+=score_reply(result,updated,lifestyle_context)
+    if commute_context is not None:
+        answer+=commute_reply(result,updated,commute_context)
     output.update(answer=answer,stage='candidates',result=result)
     return output

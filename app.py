@@ -15,6 +15,7 @@ from rent_view import render_rents
 from park_data import fetch_parks, load_parks, SOURCE_URL as PARK_SOURCE_URL
 from lifestyle_view import render_lifestyle
 from housing_score_view import render_housing_scores
+from commute_view import render_commute
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -386,6 +387,10 @@ with map_column:
         if neighborhood:
             st.caption('주황색 이름표는 선택 동네의 대표점입니다. 거래가 있었던 집의 위치나 실제 통근 가능 범위가 아닙니다.')
 
+    commute_context=render_commute(
+        neighborhood,workplace_location,st.session_state.get('conversation_conditions') or conditions,
+        st.session_state.get('rent_result'),st.session_state.get('neighborhood_locations',{}))
+    commute_context['workplace_query']=(st.session_state.get('workplace_search') or {}).get('query')
     score_context=render_housing_scores(
         st.session_state.get('rent_result'),st.session_state.get('conversation_conditions') or conditions,
         st.session_state.get('neighborhood_locations',{}),bike_result,park_data)
@@ -394,4 +399,4 @@ with map_column:
     render_place_comparison(city_data, city_preferences)
 
 with chat_column:
-    render_chat(score_context)
+    render_chat(score_context,commute_context)

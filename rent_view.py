@@ -76,7 +76,7 @@ def render_rents(conditions):
                 st.warning(str(error))
         if cache_key in cache:
             group=next(group for group in candidates['groups'] if group['dong']==dong)
-            neighborhood={**cache[cache_key],'count':group['count'],'month':result['month']}
+            neighborhood={**cache[cache_key],'count':group['count'],'month':result['month'],'dong':dong,'district_code':result['district_code']}
             st.caption(f"지도: {neighborhood['name']} 대표 위치 · 개별 주택 좌표나 동네 경계가 아닙니다. 좌표 확인 {neighborhood['queried_at']}")
         else:
             st.caption('위치 표시 버튼을 누르면 선택 동네만 조회합니다. 확인하지 못한 위치는 지도에 표시하지 않습니다.')

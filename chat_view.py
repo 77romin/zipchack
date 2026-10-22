@@ -5,7 +5,7 @@ from chat_conditions import ConversationError, map_conditions, DEFAULT_MODEL
 from chat_query import run_chat_turn
 from rent_api import service_keys
 
-def render_chat(score_context=None):
+def render_chat(score_context=None,commute_context=None):
     st.subheader('집.착과 대화하기')
     st.caption('원하는 조건을 편하게 알려주세요. 빠진 내용은 하나씩 물어볼게요.')
     history = st.session_state.setdefault('housing_chat', [])
@@ -34,7 +34,7 @@ def render_chat(score_context=None):
                     st.session_state.get('chat_optional_asked',False),
                     os.getenv('GMS_MODEL','').strip() or DEFAULT_MODEL,
                     rental_result=st.session_state.get('rent_result'),lifestyle_context=score_context,
-                    cache=st.session_state.get('rent_query_cache'))
+                    cache=st.session_state.get('rent_query_cache'),commute_context=commute_context)
                 updated,answer,asked,stage=(turn[key] for key in ['conditions','answer','asked','stage'])
             st.session_state.rent_query_cache=turn['cache']
             if turn['result'] is None:
