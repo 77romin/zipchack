@@ -1,3 +1,6 @@
+import requests
+from kakao_api import search_workplace
+
 import os
 from pathlib import Path
 from urllib.parse import quote
@@ -18,8 +21,13 @@ st.set_page_config(
 env_path = Path(__file__).resolve().parent / ".env"
 load_dotenv(env_path)
 
+
 kakao_javascript_key = os.getenv(
     "KAKAO_JAVASCRIPT_KEY", ""
+).strip()
+
+kakao_rest_api_key = os.getenv(
+    "KAKAO_REST_API_KEY", ""
 ).strip()
 
 
@@ -91,6 +99,76 @@ else:
     )
 
 
+workplace_location = None
+
+if conditions is not None:
+    query = conditions["workplace"]
+
+    # 적용한 직장 입력이 바뀌면 이전 검색 결과를 비웁니다.
+    previous_search = st.session_state.get(
+        "workplace_search", {}
+    )
+
+    if previous_search.get("query") != query:
+        st.session_state.workplace_search = {
+            "query": query,
+            "results": [],
+        }
+
+    with st.sidebar:
+        st.divider()
+        st.subheader("직장 위치 확인")
+
+        if st.button("직장 검색", use_container_width=True):
+            st.session_state.workplace_search["results"] = []
+
+            if not kakao_rest_api_key:
+                st.warning(
+                    ".env에 KAKAO_REST_API_KEY를 설정해주세요."
+                )
+            else:
+                try:
+                    with st.spinner("직장을 찾고 있습니다..."):
+                        results = search_workplace(
+                            query, kakao_rest_api_key
+                        )
+
+                    st.session_state.workplace_search[
+                        "results"
+                    ] = results
+
+                    if not results:
+                        st.info(
+                            "검색 결과가 없습니다. "
+                            "주소나 장소명을 더 구체적으로 입력해주세요."
+                        )
+
+                except requests.exceptions.RequestException:
+                    st.error(
+                        "직장 검색 요청에 실패했습니다. "
+                        "REST API 키와 네트워크 상태를 확인해주세요."
+                    )
+
+        results = st.session_state.workplace_search["results"]
+
+        if results:
+            workplace_location = st.selectbox(
+                "검색 결과에서 직장을 선택해주세요.",
+                options=results,
+                index=None,
+                placeholder="직장 선택",
+                format_func=lambda item: (
+                    f"{item['name']} · {item['address']}"
+                ),
+                key=f"workplace_selection_{query}",
+            )
+
+            if workplace_location:
+                st.caption(
+                    f"선택한 위치: {workplace_location['address']}"
+                )
+
+
 map_column, chat_column = st.columns([2, 1], gap="large")
 
 with map_column:
@@ -102,6 +180,23 @@ with map_column:
         )
     else:
         encoded_key = quote(kakao_javascript_key, safe="")
+
+
+        latitude = 37.5665
+        longitude = 126.9780
+        marker_script = ""
+
+        if workplace_location:
+            latitude = workplace_location["latitude"]
+            longitude = workplace_location["longitude"]
+
+            marker_script = """
+                new kakao.maps.Marker({
+                    map: map,
+                    position: map.getCenter()
+                });
+            """
+
 
         map_html = f"""
         <!DOCTYPE html>
@@ -136,7 +231,7 @@ with map_column:
 
                         const options = {{
                             center: new kakao.maps.LatLng(
-                                37.5665, 126.9780
+                                {latitude}, {longitude}
                             ),
                             level: 7
                         }};
@@ -144,6 +239,8 @@ with map_column:
                         const map = new kakao.maps.Map(
                             container, options
                         );
+                        
+                        {marker_script}
 
                         map.addControl(
                             new kakao.maps.ZoomControl(),
