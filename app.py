@@ -63,6 +63,39 @@ with st.sidebar:
             step=5,
         )
 
+        st.divider()
+        st.subheader("내 생활 취향")
+        st.caption("0은 반영하지 않음, 5는 매우 중요입니다.")
+
+        park_importance = st.slider(
+            "공원 접근성",
+            min_value=0,
+            max_value=5,
+            value=3,
+        )
+
+        bike_importance = st.slider(
+            "따릉이 대여소 접근성",
+            min_value=0,
+            max_value=5,
+            value=3,
+        )
+
+        age_importance = st.slider(
+            "희망 연령대의 주민 비율",
+            min_value=0,
+            max_value=5,
+            value=2,
+        )
+
+        preferred_age_range = st.slider(
+            "관심 있는 주민 연령 범위",
+            min_value=0,
+            max_value=100,
+            value=(20, 39),
+            help="연령대 중요도가 0이면 추천에 반영하지 않습니다.",
+        )
+
         submitted = st.form_submit_button(
             "조건 적용",
             use_container_width=True,
@@ -76,6 +109,12 @@ with st.sidebar:
                 "workplace": workplace.strip(),
                 "deposit_max": deposit_max,
                 "rent_max": rent_max,
+                "preferences": {
+                    "park": park_importance,
+                    "bike": bike_importance,
+                    "age": age_importance,
+                },
+                "preferred_age_range": list(preferred_age_range),
             }
             st.success("조건을 저장했습니다.")
     
@@ -97,6 +136,41 @@ else:
         f"보증금 {conditions['deposit_max']:,}만원 이하 · "
         f"월세 {conditions['rent_max']:,}만원 이하"
     )
+    
+    preferences = conditions.get("preferences")
+
+    if preferences is not None:
+        age_min, age_max = conditions["preferred_age_range"]
+
+        preference_labels = []
+
+        if preferences["park"] > 0:
+            preference_labels.append(
+                f"공원 {preferences['park']}/5"
+            )
+
+        if preferences["bike"] > 0:
+            preference_labels.append(
+                f"따릉이 {preferences['bike']}/5"
+            )
+
+        if preferences["age"] > 0:
+            preference_labels.append(
+                f"{age_min}~{age_max}세 주민 비율 "
+                f"{preferences['age']}/5"
+            )
+
+        if preference_labels:
+            st.caption(
+                "적용한 선호 · " + " · ".join(preference_labels)
+            )
+        else:
+            st.caption(
+                "생활 선호 없이 예산 조건으로 탐색합니다."
+            )
+
+        with st.expander("저장된 조건 확인"):
+            st.json(conditions)
 
 
 workplace_location = None
