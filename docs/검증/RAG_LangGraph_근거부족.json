@@ -1,0 +1,161 @@
+{
+  "item_id": "1144010200",
+  "question": "공덕동에서 지금 보증금 1000만원 월세 70만원으로 즉시 입주할 수 있는 정확한 호수와 집주인 연락처를 알려줘",
+  "mode": "similarity",
+  "retrieval": {
+    "item_id": "1144010200",
+    "mode": "similarity",
+    "k": 4,
+    "fetch_k": 20,
+    "weight": 0.5,
+    "candidate_count": 9,
+    "external_count": 4,
+    "evidence": [
+      {
+        "id": "fc5a7a01298ccaa80344dd3dd5dc6e82f429c875f48d4608f67aa2a3ad1ce0a1",
+        "text": "동네명: 공덕동\n전체 이름: 서울특별시 마포구 공덕동\n법정동 코드: 1144010200\n자치구: 마포구\n단위: 법정동\n공식 코드 목록 상태: 존재\n이 목록은 행정동 경계·인구·가격·통근시간·주거 적합도를 제공하지 않습니다.",
+        "metadata": {
+          "chunk_overlap": 200,
+          "document_id": "legal-dong",
+          "chunk_index": 0,
+          "kind": "metadata",
+          "item_id": "1144010200",
+          "observed_at": "2026-10-22T14:47:59.206986+09:00",
+          "title": "서울특별시 마포구 공덕동",
+          "fingerprint": "f9b442239508e20c75e2dcf7ef5e862627b30de2fcbd78bced9fb5a1b20f7979",
+          "chunk_size": 1000,
+          "source_url": "https://www.code.go.kr/stdcode/regCodeL.do"
+        },
+        "citation": 1
+      },
+      {
+        "id": "11d4155936b5c8b72835ef48dd7754a36cf7ac600cfcbd5e151c127edc185f0d",
+        "text": "공덕동(孔德洞)은 서울특별시 마포구의 행정동, 법정동이다. 공덕역을 중심으로 업무지구를 형성하고 있다.\n\n\n== 역사 ==\n공덕이라는 동명의 유래는 확실치 않으나, 한자의 공덕(孔德)의 의미보다는 우리말의 ‘큰더기’에서 유래된 것으로 보인다. 즉 우리말로 조금 높은 고원의 평평한 곳의 ‘더기’ 또는 ‘덕’, ‘언덕’으로 일컬었는데 위에 보인 공덕리 일대는 대개 만리현, 아현, 대현 고갯마루에서 서남쪽으로 펼쳐 내려간 언덕길 지대이기 때문에 이 지역을 옛날에 우리말로 ‘큰더기’, ‘큰덕’으로 전칭되던 것이 당시 한자음이 비슷한 공덕으로 옮겨지게 된 것으로 여겨진다. 한편, 공덕동의 유래에 대해서 옛 지명 공덕리에서 유래되었다는 설도 있다.\n\n\n== 법정동 ==\n공덕동\n아현동\n신공덕동\n\n\n== 교육 ==\n소의초등학교\n공덕초등학교\n\n\n== 교통 ==\n공덕역 : ● 수도권 전철 5호선, ● 서울 지하철 6호선, ● 수도권 전철 경의·중앙선, ● 인천국제공항철도 4개 노선 환승이 가능하다. 전국에서 4개 노선 환승이 가능한 역은 공덕역, 서울역, 왕십리역 3곳뿐이다.\n\n\n== 아파트 ==\n\n\n== 각주 ==\n\n\n== 외부 링크 ==\n마포구 공덕동 주민센터 보관됨 2017-06-28 - 웨이백 머신",
+        "metadata": {
+          "chunk_overlap": 200,
+          "observed_at": "2026-03-02T12:11:57Z",
+          "source_url": "https://ko.wikipedia.org/w/index.php?oldid=41433344",
+          "license": "CC BY-SA 4.0",
+          "chunk_index": 0,
+          "document_id": "wikipedia:803942",
+          "revision_id": "41433344",
+          "kind": "external",
+          "fingerprint": "2696ac213ebfbf31d22a90bb8384cbfa805c95d7d96a53fc5171f39d8c8e61f3",
+          "chunk_size": 1000,
+          "attribution": "한국어 위키백과 기여자, 공덕동; https://ko.wikipedia.org/w/index.php?title=%EA%B3%B5%EB%8D%95%EB%8F%99&action=history",
+          "item_id": "1144010200",
+          "title": "공덕동"
+        },
+        "cosine": 0.3789469221497517,
+        "citation": 2
+      },
+      {
+        "id": "1e6c8f652676fbb0aba292a6cacfd4ca7033dbe41b9d811435ca3cf97fc4096f",
+        "text": "== 스포츠 ==\n서울월드컵경기장 (프로축구 K리그1 FC 서울 홈구장)\n서울월드컵 보조경기장 (여자 축구 WK리그 서울시청 홈구장)\n\n\n== 역대 건축물 ==\n마포아파트 (現 마포삼성아파트)\n\n\n== 자매 도시 ==\n\n\n== 역대 구청장 ==\n\n\n== 각주 ==\n\n\n== 외부 링크 ==\n\n(한국어/영어/일본어/중국어) 마포구청 (공식)",
+        "metadata": {
+          "observed_at": "2026-10-08T00:51:19Z",
+          "item_id": "1144010200",
+          "attribution": "한국어 위키백과 기여자; https://ko.wikipedia.org/w/index.php?title=%EB%A7%88%ED%8F%AC%EA%B5%AC&action=history",
+          "source_url": "https://ko.wikipedia.org/w/index.php?oldid=42625439",
+          "document_id": "wikipedia:5857",
+          "chunk_size": 1000,
+          "chunk_index": 4,
+          "license": "CC BY-SA 4.0",
+          "fingerprint": "d0c4f69521481f51f07ab3e743d04982e1b4d43e8419664bd4e352b72b7e1e9f",
+          "revision_id": "42625439",
+          "title": "마포구",
+          "chunk_overlap": 200,
+          "kind": "external"
+        },
+        "cosine": 0.27107719566742877,
+        "citation": 3
+      },
+      {
+        "id": "7c8d5d778a7473ae67eeabc296d04b2e37c9a1e49a5bb86d9cbb2e100d420446",
+        "text": "=== 버스 업체 ===\n\n시내버스\n\n마을버스\n\n\n== 문화 ==\n공공예술가 5명의 모임인 \"공화국 리라\"는 2007년부터 망원동의 구석구석을 예술품으로 장식하는 \"동네예술가 프로젝트\"를 진행 중이다. 이들은 방범초소나 주택 외벽에 벽화를 그리거나 나무 화단을 설치하고 있다. 공덕동에는 순댓국 등을 파는 \"소문난 집\", 두부찌개 등을 파는 \"옥상휴게실\", 모듬전 등을 파는 \"원조 할머니 빈대떡\"이 있다. 도레미의 만화 《검정고무신》과 구자홍의 영화 《나는 공무원이다》의 배경이 된 지역이기도 하다.\n\n\n== 교육 ==\n\n사립대학교\n서강대학교\n홍익대학교\n고등학교\n서울여자고등학교\n한세사이버보안고등학교\n홍익디자인고등학교\n경성고등학교\n상암고등학교\n광성고등학교\n홍익대학교 사범대학 부속여자고등학교\n숭문고등학교\n아현산업정보학교\n서울디자인고등학교\n중학교\n경성중학교\n광성중학교\n동도중학교\n상암중학교\n서울여자중학교\n성사중학교\n성산중학교\n성서중학교\n숭문중학교\n신수중학교\n아현중학교\n중암중학교\n창천중학교\n홍익대학교 사범대학 부속여자중학교\n초등학교\n서울공덕초등학교\n서울동교초등학교\n서울마포초등학교\n서울망원초등학교\n서울상암초등학교\n서울상지초등학교\n서울서강초등학교\n서울서교초등학교\n서울성산초등학교\n서울성서초등학교\n서울성원초등학교\n서울소의초등학교\n서울신북초등학교\n서울신석초등학교\n서울아현초등학교\n서울염리초등학교\n서울용강초등학교\n서울중동초등학교\n서울창천초등학교\n서울하늘초등학교\n서울한서초등학교\n홍익대학교 사범대학 부속초등학교\n외국인학교\n서울일본인학교\n특수학교\n한국우진학교\n\n\n== 주요 기관 ==\n국악방송\nCJ ENM 본사\nMBC 상암 신사옥\nYTN뉴스퀘어\nJTBC\nKBS미디어센터\nSBS콘텐츠허브\nTBS\n도로교통공단 서부운전면허시험장\n대전광역시서울사무소\n\n\n== 스포츠 ==\n서울월드컵경기장 (프로축구 K리그1 FC 서울 홈구장)\n서울월드컵 보조경기장 (여자 축구 WK리그 서울시청 홈구장)\n\n\n== 역대 건축물 ==\n마포아파트 (現 마포삼성아파트)\n\n\n== 자매 도시 ==\n\n\n== 역대 구청장 ==",
+        "metadata": {
+          "chunk_index": 3,
+          "fingerprint": "406ac58e76ec409a52fbb7dec91fe3d6d38d947ef044bcf041eefe43f3a11a32",
+          "license": "CC BY-SA 4.0",
+          "revision_id": "42625439",
+          "source_url": "https://ko.wikipedia.org/w/index.php?oldid=42625439",
+          "item_id": "1144010200",
+          "kind": "external",
+          "chunk_overlap": 200,
+          "title": "마포구",
+          "observed_at": "2026-10-08T00:51:19Z",
+          "document_id": "wikipedia:5857",
+          "chunk_size": 1000,
+          "attribution": "한국어 위키백과 기여자; https://ko.wikipedia.org/w/index.php?title=%EB%A7%88%ED%8F%AC%EA%B5%AC&action=history"
+        },
+        "cosine": 0.2621188537965155,
+        "citation": 4
+      },
+      {
+        "id": "2296937e3b77c5772bf5de1a25e4cb4f8f8ad4341545d441724a57f6a77e3925",
+        "text": "== 이용객 변동 ==\n6호선의 2000년 자료는 개통일인 2000년 12월 15일부터 12월 31일까지 총 17일간, 공항철도의 2011년 자료는 개통일인 2011년 11월 30일부터 12월 31일까지 32일간, 용산선의 2012년 자료는 개통일인 2012년 12월 15일부터 12월 31일까지 17일간의 집계를 반영한 것이다.\n\n\n== 사진 ==\n\n\n== 인접한 역 ==\n\n\n== 같이 보기 ==\n\n공덕리역 : 공덕역 위치에 있던 용산선의 폐역\n\n\n== 기타 ==\n2019년 3월 KT와 경찰청이 발표한 수도권 '지하철역 디지털 성범죄 위험도'에 따르면, 2018년 7월 기준 1~9호선 역별 디지털 성범죄 위험도에 따르면 위험도 1등급은 서울역(1·2·10번 출구), 동대문역사문화공원역(1·13번 출구), 여의도역(3번 출구), 공덕역(4번 출구)으로, 여의도역이 몰카위험이 높은 것으로 나타났다.\n\n\n== 각주 ==\n\n\n== 외부 링크 ==\n공덕역 소개 (서울교통공사 사이버 스테이션 홈페이지)\n공항철도 공덕역  (공항철도 사이버스테이션 홈페이지) 보관됨 2018-11-15 - 웨이백 머신",
+        "metadata": {
+          "chunk_index": 2,
+          "attribution": "한국어 위키백과 기여자; https://ko.wikipedia.org/w/index.php?title=%EA%B3%B5%EB%8D%95%EC%97%AD&action=history",
+          "observed_at": "2026-08-07T11:36:47Z",
+          "fingerprint": "641fcb2d8e7175b82ff7d85b2b98acaf66f87400b4375f9293934945d2b2150b",
+          "revision_id": "42263294",
+          "license": "CC BY-SA 4.0",
+          "title": "공덕역",
+          "chunk_size": 1000,
+          "source_url": "https://ko.wikipedia.org/w/index.php?oldid=42263294",
+          "document_id": "wikipedia:15105",
+          "item_id": "1144010200",
+          "chunk_overlap": 200,
+          "kind": "external"
+        },
+        "cosine": 0.23838554570809709,
+        "citation": 5
+      }
+    ],
+    "timings": {
+      "embedding_ms": 648.8435999490321,
+      "vector_ms": 3.2052999595180154,
+      "selection_ms": 1.7106999875977635,
+      "total_ms": 737.5558000057936
+    },
+    "notice": null
+  },
+  "answer": "요청하신 “공덕동에서 보증금 1000만원 / 월세 70만원 / 즉시 입주” 조건에 대해 **정확한 호수(주소 단위)와 집주인 연락처**를 제공할 수 없습니다. 제공된 근거에는 공덕동의 동네/교통/기관/교육 등 일반 정보만 있고, 특정 임대 매물의 **호수 정보, 임대조건(보증금·월세), 입주 가능 시점(즉시), 집주인 연락처** 같은 데이터가 없습니다. 따라서 확인할 수 없는 부분(호수·연락처·해당 조건 충족 여부)을 자료 부족으로 처리합니다. [1]\n\n추가로, 근거에 공덕동의 위치(서울특별시 마포구 공덕동) 및 공덕역의 노선 환승 가능 여부 같은 정보는 있으나, 그것만으로는 특정 월세 매물의 호수와 연락처를 특정할 수 없습니다. [1][2]",
+  "abstained": true,
+  "citations": [
+    {
+      "numbers": [
+        1
+      ],
+      "title": "서울특별시 마포구 공덕동",
+      "source_url": "https://www.code.go.kr/stdcode/regCodeL.do",
+      "kind": "metadata",
+      "observed_at": "2026-10-22T14:47:59.206986+09:00"
+    },
+    {
+      "numbers": [
+        2
+      ],
+      "title": "공덕동",
+      "source_url": "https://ko.wikipedia.org/w/index.php?oldid=41433344",
+      "kind": "external",
+      "observed_at": "2026-03-02T12:11:57Z",
+      "license": "CC BY-SA 4.0",
+      "attribution": "한국어 위키백과 기여자, 공덕동; https://ko.wikipedia.org/w/index.php?title=%EA%B3%B5%EB%8D%95%EB%8F%99&action=history",
+      "revision_id": "41433344"
+    }
+  ],
+  "timings": {
+    "retrieve_ms": 737.5558000057936,
+    "generate_ms": 2288.601499982178,
+    "nodes_total_ms": 3026.157299987972,
+    "end_to_end_ms": 3029.1428999044
+  },
+  "trace": [
+    "retrieve",
+    "generate"
+  ],
+  "prompt_version": "answer-v1",
+  "model": "gpt-5.4-nano"
+}

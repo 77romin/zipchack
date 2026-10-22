@@ -24,3 +24,6 @@ openpyxl==3.1.5
 # RAG 색인 (원본 지정 버전)
 chromadb==1.5.9
 langchain-text-splitters==1.1.2
+
+# RAG 검색·생성 그래프 (원본 지정 버전)
+langgraph==1.2.10
