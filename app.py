@@ -4,6 +4,8 @@ from kakao_api import search_workplace
 import os
 from pathlib import Path
 from map_view import build_map_html
+from bike_data import load_stations, SOURCE_URL
+from geo import stations_within
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -261,6 +263,30 @@ if conditions is not None:
                 )
 
 
+nearby_stations = []
+with st.sidebar:
+    st.divider()
+    st.subheader("따릉이 대여소 위치")
+    st.caption("공식 위치 파일을 불러옵니다. 실시간 재고는 사용하지 않습니다.")
+    st.link_button("공식 위치 자료 받기", SOURCE_URL)
+    bike_file = st.file_uploader("대여소 위치 CSV / XLSX", type=["csv", "xlsx"])
+    if bike_file is not None:
+        try:
+            bike_result = load_stations(bike_file.getvalue(), bike_file.name)
+            st.caption(f"위치 {len(bike_result['stations']):,}개 · 제외/중복 {bike_result['skipped']:,}행")
+            if workplace_location:
+                nearby_stations = stations_within(
+                    bike_result["stations"], workplace_location["latitude"],
+                    workplace_location["longitude"], conditions.get("search_radius_km", 3.0),
+                )
+                st.caption(f"탐색 반경 안 대여소 {len(nearby_stations):,}개")
+                if not nearby_stations:
+                    st.info("불러온 위치 자료에 탐색 반경 안 대여소가 없습니다.")
+            else:
+                st.info("직장 위치를 선택하면 주변 대여소를 표시합니다.")
+        except ValueError as error:
+            st.warning(str(error))
+
 map_column, chat_column = st.columns([2, 1], gap="large")
 
 with map_column:
@@ -270,10 +296,18 @@ with map_column:
     else:
         radius_km = conditions.get("search_radius_km", 3.0) if conditions else 3.0
         st.iframe(
-            build_map_html(kakao_javascript_key, workplace_location, radius_km),
+            build_map_html(kakao_javascript_key, workplace_location, radius_km, nearby_stations),
             height=530,
         )
     st.caption("파란 원은 직선거리 탐색 범위이며 실제 통근 가능 영역이 아닙니다.")
+
+    if nearby_stations:
+        with st.expander("주변 따릉이 대여소 목록"):
+            st.caption("출처: 서울특별시 대여소 위치 자료 · 자료 기준일은 내려받은 원본에서 확인해주세요.")
+            st.dataframe([
+                {"대여소":x["name"], "직장에서 직선거리(m)":x["distance_m"]}
+                for x in nearby_stations
+            ], hide_index=True)
 
 with chat_column:
     st.subheader("집.착과 대화하기")

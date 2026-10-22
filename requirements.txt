@@ -16,3 +16,7 @@ python-dotenv==1.2.3
 
 # 8단계 — 위키백과 API 샘플
 requests==2.34.2
+
+# 공식 따릉이 위치 파일(CSV / XLSX)
+pandas==3.0.6
+openpyxl==3.1.5

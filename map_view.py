@@ -4,7 +4,7 @@ import math
 from urllib.parse import quote
 
 
-def build_map_html(javascript_key, workplace=None, radius_km=3.0):
+def build_map_html(javascript_key, workplace=None, radius_km=3.0, stations=None):
     radius_km = float(radius_km)
     if not math.isfinite(radius_km) or not 0.5 <= radius_km <= 10:
         raise ValueError("탐색 반경은 0.5~10km여야 합니다.")
@@ -15,7 +15,7 @@ def build_map_html(javascript_key, workplace=None, radius_km=3.0):
             raise ValueError("유효한 위도·경도가 필요합니다.")
         center = {"latitude": lat, "longitude": lon}
     payload = json.dumps({"center": center, "workplace": bool(workplace),
-                          "radius_m": round(radius_km * 1000)}, ensure_ascii=False)
+                          "stations": stations or [], "radius_m": round(radius_km * 1000)}, ensure_ascii=False)
     # HTML의 script 종료 태그를 데이터로 삽입할 수 없게 한다.
     payload = payload.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
     return TEMPLATE.replace("__KEY__", quote(javascript_key, safe="")).replace("__DATA__", payload)
@@ -35,6 +35,19 @@ if(window.kakao && window.kakao.maps){
     const center = new kakao.maps.LatLng(data.center.latitude, data.center.longitude);
     const map = new kakao.maps.Map(document.getElementById('map'), {center:center, level:7});
     map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
+    const stationInfo = new kakao.maps.InfoWindow({removable:true});
+    (data.stations || []).forEach(function(station){
+      const marker = new kakao.maps.Marker({map:map,
+        position:new kakao.maps.LatLng(station.latitude,station.longitude),
+        title:'따릉이 · '+station.name});
+      kakao.maps.event.addListener(marker,'click',function(){
+        const text = document.createElement('div');
+        text.style.cssText='padding:12px;min-width:160px;max-width:260px;white-space:normal';
+        text.textContent='따릉이 '+station.name+' · 직장에서 직선 '+station.distance_m+'m';
+        stationInfo.setContent(text);
+        stationInfo.open(map,marker);
+      });
+    });
     if(data.workplace){
       new kakao.maps.Marker({map:map, position:center, title:'선택한 직장'});
       const circle = new kakao.maps.Circle({center:center, radius:data.radius_m,
