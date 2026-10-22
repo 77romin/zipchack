@@ -1,0 +1,17 @@
+{
+  "created_at": "2026-10-22T05:38:50.210369+00:00",
+  "dry_run": false,
+  "documents": 132,
+  "external_documents": 132,
+  "metadata_items": 0,
+  "prepared_chunks": 132,
+  "embedded": 113,
+  "removed": 0,
+  "chunk_size": 1000,
+  "overlap": 200,
+  "collection_counts": {
+    "metadata": 0,
+    "external": 132
+  },
+  "model": "text-embedding-3-small"
+}

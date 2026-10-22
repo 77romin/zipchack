@@ -3,8 +3,8 @@
 #
 #     pip install -r requirements.txt
 #
-# 이 실습은 Vector DB도 LangGraph도 쓰지 않는다.
-# 오후에 프로젝트로 넘어갈 때 프로젝트 requirements.txt를 추가로 설치한다.
+# 집.착 프로젝트는 아래 RAG 색인 의존성을 함께 설치한다.
+# LangGraph 의존성은 검색·생성 파이프라인 구현 단계에 추가한다.
 
 # 1~7단계 (Streamlit)
 streamlit==1.62.0
@@ -20,3 +20,7 @@ requests==2.34.2
 # 공식 따릉이 위치 파일(CSV / XLSX)
 pandas==3.0.6
 openpyxl==3.1.5
+
+# RAG 색인 (원본 지정 버전)
+chromadb==1.5.9
+langchain-text-splitters==1.1.2

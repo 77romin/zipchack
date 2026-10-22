@@ -27,3 +27,6 @@ __pycache__/
 Thumbs.db
 # 빈 설정 예시는 공유
 !.env.example
+
+# 로컬 벡터 DB / 실험 임시 저장
+/storage/
