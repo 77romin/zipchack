@@ -7,6 +7,10 @@ if (-not (Test-Path -LiteralPath $zipPython)) {
 }
 Push-Location -LiteralPath $zipProjectRoot
 try {
+    & $zipPython -c "import streamlit, langchain_text_splitters, chromadb, langgraph"
+    if ($LASTEXITCODE -ne 0) {
+        throw '프로젝트 의존성이 부족합니다. .\.venv\Scripts\python.exe -m pip install -r requirements.txt 를 실행한 뒤 다시 시도해주세요.'
+    }
     & $zipPython -m streamlit run (Join-Path $zipProjectRoot 'app.py') @args
 } finally {
     Pop-Location
