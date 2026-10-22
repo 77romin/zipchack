@@ -10,6 +10,7 @@ from seoul_api import fetch_citydata, SeoulDataError
 from city_view import render_citydata
 from city_preferences import preference_controls, render_place_comparison
 from city_match import facility_markers
+from chat_view import render_chat
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -142,7 +143,7 @@ st.caption("예산부터 출근길까지, 내 생활을 기준으로 찾아보�
 conditions = st.session_state.housing_conditions
 
 if conditions is None:
-    st.info("왼쪽에서 주거 조건을 입력하고 적용해주세요.")
+    st.info("오른쪽 대화로 주거 조건을 알려주세요. 왼쪽 입력 화면도 사용할 수 있습니다.")
 else:
     st.write(f"**직장:** {conditions['workplace']}")
 
@@ -354,10 +355,4 @@ with map_column:
     render_place_comparison(city_data, city_preferences)
 
 with chat_column:
-    st.subheader("집.착과 대화하기")
-
-    with st.container(border=True, height=500):
-        with st.chat_message("assistant"):
-            st.write(
-                "안녕하세요! 어떤 집과 동네를 찾고 계신가요?"
-            )
+    render_chat()
