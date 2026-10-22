@@ -11,6 +11,7 @@ from city_view import render_citydata
 from city_preferences import preference_controls, render_place_comparison
 from city_match import facility_markers
 from chat_view import render_chat
+from rent_view import render_rents
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -349,6 +350,8 @@ with map_column:
                 {"대여소":x["name"], "직장에서 직선거리(m)":x["distance_m"]}
                 for x in nearby_stations
             ], hide_index=True)
+
+    render_rents(st.session_state.get("conversation_conditions") or conditions)
 
     if city_data:
         render_citydata(city_data)

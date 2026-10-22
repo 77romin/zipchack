@@ -39,7 +39,7 @@ def collect_turn(message, current, history, api_key, optional_asked=False, model
         return updated, '기존 조건은 유지했어요. 바꿀 조건을 구체적으로 알려주거나 “추천해줘”라고 해주세요.', True, 'ready'
     answer = ('추가 조건 없이 지금까지 정리한 조건으로 진행할게요.' if finished else '생활 선호를 포함해 조건을 정리했어요.')
     answer += '\n\n' + summary(updated)
-    answer += ('\n\n조건 수집은 완료됐어요. 현재는 실거래가·동네 근거 검색이 미구현이라 '
+    answer += ('\n\n조건 수집은 완료됐어요. 아직 동네 근거 검색과 종합 추천이 연결되지 않아 '
                '이 조건에 맞는 실제 추천지를 아직 조회할 수 없어요. '
-               '대중교통 통근시간도 아직 검증되지 않았어요. 조건을 유지하고 추천 데이터 연결 단계로 이어갈게요.')
+               '대중교통 통근시간도 아직 검증되지 않았어요. 실거래 조회 화면에서 지역과 계약월을 선택하면 예산에 맞는 과거 거래를 확인할 수 있어요.')
     return updated, answer, True, 'waiting_for_data'
