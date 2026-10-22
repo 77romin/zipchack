@@ -5,7 +5,8 @@ from rag_retrieve import select,retrieve
 
 class RetrieveTests(unittest.TestCase):
     def test_mmr_changes_diversity_and_lambda_one_matches_similarity(self):
-        vectors=[[1.,0.],[.99,.01],[.6,.8]]
+        import numpy as np
+        vectors=np.array([[1.,0.],[.99,.01],[.6,.8]])
         similar,_=select(vectors,[1.,0.],2)
         diverse,_=select(vectors,[1.,0.],2,'mmr',.2)
         self.assertEqual(similar,[0,1]);self.assertEqual(diverse,[0,2])

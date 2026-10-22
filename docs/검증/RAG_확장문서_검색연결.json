@@ -1,0 +1,201 @@
+{
+  "purpose": "문서 확장 후 연결 확인. 정식 품질 비교가 아님.",
+  "results": [
+    {
+      "item_id": "1144010200",
+      "mode": "similarity",
+      "k": 3,
+      "fetch_k": 20,
+      "weight": 0.5,
+      "candidate_count": 9,
+      "external_count": 3,
+      "evidence": [
+        {
+          "id": "fc5a7a01298ccaa80344dd3dd5dc6e82f429c875f48d4608f67aa2a3ad1ce0a1",
+          "text": "동네명: 공덕동\n전체 이름: 서울특별시 마포구 공덕동\n법정동 코드: 1144010200\n자치구: 마포구\n단위: 법정동\n공식 코드 목록 상태: 존재\n이 목록은 행정동 경계·인구·가격·통근시간·주거 적합도를 제공하지 않습니다.",
+          "metadata": {
+            "item_id": "1144010200",
+            "kind": "metadata",
+            "title": "서울특별시 마포구 공덕동",
+            "document_id": "legal-dong",
+            "chunk_overlap": 200,
+            "observed_at": "2026-10-22T14:47:59.206986+09:00",
+            "fingerprint": "f9b442239508e20c75e2dcf7ef5e862627b30de2fcbd78bced9fb5a1b20f7979",
+            "source_url": "https://www.code.go.kr/stdcode/regCodeL.do",
+            "chunk_size": 1000,
+            "chunk_index": 0
+          },
+          "citation": 1
+        },
+        {
+          "id": "a379db2eecb538b0a149aa0153bc323bdf3a47828bccc5e0eb82fa045368e830",
+          "text": "공덕역(孔德驛, Gongdeok station)은 서울특별시 마포구 공덕동과 도화동에 위치한 수도권 전철 5호선과 서울 지하철 6호선, 인천국제공항철도, 그리고 수도권 전철 경의·중앙선의 환승역이다. 서울 지하철 6호선은 심야에 2편성이 주박한다. 수도권 전철 5호선은 이 역부터 여의나루역까지 섬식 승강장이다. 서울 지하철 6호선은 이 역에만 상대식 승강장이다. 인천국제공항철도는 이 역부터 홍대입구역까지 상대식 승강장이다.\n\n\n== 역사 ==\n1996년 12월 30일 : 서울 지하철 5호선 여의도 - 왕십리 구간 개통과 함께 영업 개시\n2000년 12월 15일 : 서울 지하철 6호선 봉화산 - 응암순환 구간 개통과 함께 환승역이 됨\n2011년 11월 30일 : 인천국제공항철도 개통과 함께 3개 노선 환승역이 됨\n2012년 12월 15일 : 수도권 전철 경의선 공덕 ~ 디지털미디어시티 구간 개통과 함께 4개 노선 환승역이 됨\n2014년 12월 27일 : 수도권 전철 경의선 공덕 ~ 용산 구간 개통과 함께 문산역 ~ 용문역간 수도권 전철 경의·중앙선 직결 운행 개시로 중간역이 됨",
+          "metadata": {
+            "source_url": "https://ko.wikipedia.org/w/index.php?oldid=42263294",
+            "item_id": "1144010200",
+            "document_id": "wikipedia:15105",
+            "chunk_overlap": 200,
+            "chunk_size": 1000,
+            "kind": "external",
+            "license": "CC BY-SA 4.0",
+            "title": "공덕역",
+            "fingerprint": "f3692a1f8cf4e4d579f0e010febb2870c6abe91df34c38212203fa66730fb4d5",
+            "revision_id": "42263294",
+            "attribution": "한국어 위키백과 기여자; https://ko.wikipedia.org/w/index.php?title=%EA%B3%B5%EB%8D%95%EC%97%AD&action=history",
+            "observed_at": "2026-08-07T11:36:47Z",
+            "chunk_index": 0
+          },
+          "cosine": 0.5008492337273396,
+          "citation": 2
+        },
+        {
+          "id": "7ca19690f44106dbc4d09824f0f3ef71aa4fed8cb41cc84173b9e6fa1ba79849",
+          "text": "== 역 구조 ==\n5호선은 1면 2선의 섬식 승강장이고, 나머지 노선은 모두 2면 2선의 상대식 승강장이다. 모든 승강장에 스크린도어가 설치되어 있다. 출구는 서울교통공사 소속 8개, 공항철도, 한국철도공사 소속 2개로 총 10개가 있다.\n현재 5호선과 6호선이 거의 L에 가까운 십(十)자 교차를 하고 있다. 5호선이 아래에, 6호선이 위에 있다. 공항철도와 경의·중앙선(용산선)은 6호선과 나란히 놓여 있다. 5호선으로 내려가는 통로는 엘리베이터와 계단이 모두 있으며 높이차가 크고 가파른 경사를 이룬다. 그 뒤에도 덜 가파른 내리막과 오르막이 각각 하나씩 있으며 엘리베이터와 계단이 모두 설치되어 있다. 갈아타는 데 약 5~6분 정도 소요된다.\n공항철도의 승강장은 다른 노선보다 아래인 지하 5층에 있으며 벽으로 막힌 승강장은 용산역행 열차가 사용할 예정이고, 경의·중앙선의 승강장은 지하 2층에 있다.\n\n\n=== 승강장 ===\n\n\n==== 서울교통공사 ====\n\n\n===== 5호선 승강장 (B3F) =====\n\n\n====== 배선도 ======\n\n\n===== 6호선 승강장 (B2F) =====\n\n\n==== 공항철도 (B5F) ====\n\n\n==== 한국철도공사 (B2F) ====\n\n\n=== 환승 ===\n공항철도, 경의·중앙선 대합실에서 5호선, 6호선 1~8번 출구를 이용할 경우 경의선 공덕역의 역장은 개표 후 지상을 이용해 다시 8번이나 7번 출구를 이용해 지하로 내려가 찾아가라는 안내를 제공한다.\n\n\n== 역 주변 ==\n공덕역을 중심으로 부도심이 형성되어 있으며, 아현뉴타운을 중심으로 재개발이 진행되고 있다.\n1번 출구\n\n\n== 이용객 변동 ==\n6호선의 2000년 자료는 개통일인 2000년 12월 15일부터 12월 31일까지 총 17일간, 공항철도의 2011년 자료는 개통일인 2011년 11월 30일부터 12월 31일까지 32일간, 용산선의 2012년 자료는 개통일인 2012년 12월 15일부터 12월 31일까지 17일간의 집계를 반영한 것이다.",
+          "metadata": {
+            "chunk_size": 1000,
+            "attribution": "한국어 위키백과 기여자; https://ko.wikipedia.org/w/index.php?title=%EA%B3%B5%EB%8D%95%EC%97%AD&action=history",
+            "kind": "external",
+            "item_id": "1144010200",
+            "observed_at": "2026-08-07T11:36:47Z",
+            "chunk_overlap": 200,
+            "document_id": "wikipedia:15105",
+            "revision_id": "42263294",
+            "chunk_index": 1,
+            "title": "공덕역",
+            "license": "CC BY-SA 4.0",
+            "source_url": "https://ko.wikipedia.org/w/index.php?oldid=42263294",
+            "fingerprint": "64b53e5b1bf1627d0f076b2ff95fec5ad7698958b3a1aeb625a53253c475ccd7"
+          },
+          "cosine": 0.4395750758475724,
+          "citation": 3
+        },
+        {
+          "id": "2296937e3b77c5772bf5de1a25e4cb4f8f8ad4341545d441724a57f6a77e3925",
+          "text": "== 이용객 변동 ==\n6호선의 2000년 자료는 개통일인 2000년 12월 15일부터 12월 31일까지 총 17일간, 공항철도의 2011년 자료는 개통일인 2011년 11월 30일부터 12월 31일까지 32일간, 용산선의 2012년 자료는 개통일인 2012년 12월 15일부터 12월 31일까지 17일간의 집계를 반영한 것이다.\n\n\n== 사진 ==\n\n\n== 인접한 역 ==\n\n\n== 같이 보기 ==\n\n공덕리역 : 공덕역 위치에 있던 용산선의 폐역\n\n\n== 기타 ==\n2019년 3월 KT와 경찰청이 발표한 수도권 '지하철역 디지털 성범죄 위험도'에 따르면, 2018년 7월 기준 1~9호선 역별 디지털 성범죄 위험도에 따르면 위험도 1등급은 서울역(1·2·10번 출구), 동대문역사문화공원역(1·13번 출구), 여의도역(3번 출구), 공덕역(4번 출구)으로, 여의도역이 몰카위험이 높은 것으로 나타났다.\n\n\n== 각주 ==\n\n\n== 외부 링크 ==\n공덕역 소개 (서울교통공사 사이버 스테이션 홈페이지)\n공항철도 공덕역  (공항철도 사이버스테이션 홈페이지) 보관됨 2018-11-15 - 웨이백 머신",
+          "metadata": {
+            "observed_at": "2026-08-07T11:36:47Z",
+            "title": "공덕역",
+            "license": "CC BY-SA 4.0",
+            "revision_id": "42263294",
+            "item_id": "1144010200",
+            "source_url": "https://ko.wikipedia.org/w/index.php?oldid=42263294",
+            "fingerprint": "641fcb2d8e7175b82ff7d85b2b98acaf66f87400b4375f9293934945d2b2150b",
+            "kind": "external",
+            "document_id": "wikipedia:15105",
+            "chunk_index": 2,
+            "attribution": "한국어 위키백과 기여자; https://ko.wikipedia.org/w/index.php?title=%EA%B3%B5%EB%8D%95%EC%97%AD&action=history",
+            "chunk_size": 1000,
+            "chunk_overlap": 200
+          },
+          "cosine": 0.43346351726502436,
+          "citation": 4
+        }
+      ],
+      "timings": {
+        "embedding_ms": 589.4241000059992,
+        "vector_ms": 2.979899989441037,
+        "selection_ms": 1.7512000631541014,
+        "total_ms": 679.5826000161469
+      },
+      "notice": null
+    },
+    {
+      "item_id": "1144010200",
+      "mode": "mmr",
+      "k": 3,
+      "fetch_k": 20,
+      "weight": 0.5,
+      "candidate_count": 9,
+      "external_count": 3,
+      "evidence": [
+        {
+          "id": "fc5a7a01298ccaa80344dd3dd5dc6e82f429c875f48d4608f67aa2a3ad1ce0a1",
+          "text": "동네명: 공덕동\n전체 이름: 서울특별시 마포구 공덕동\n법정동 코드: 1144010200\n자치구: 마포구\n단위: 법정동\n공식 코드 목록 상태: 존재\n이 목록은 행정동 경계·인구·가격·통근시간·주거 적합도를 제공하지 않습니다.",
+          "metadata": {
+            "document_id": "legal-dong",
+            "chunk_overlap": 200,
+            "fingerprint": "f9b442239508e20c75e2dcf7ef5e862627b30de2fcbd78bced9fb5a1b20f7979",
+            "title": "서울특별시 마포구 공덕동",
+            "chunk_size": 1000,
+            "item_id": "1144010200",
+            "observed_at": "2026-10-22T14:47:59.206986+09:00",
+            "kind": "metadata",
+            "source_url": "https://www.code.go.kr/stdcode/regCodeL.do",
+            "chunk_index": 0
+          },
+          "citation": 1
+        },
+        {
+          "id": "a379db2eecb538b0a149aa0153bc323bdf3a47828bccc5e0eb82fa045368e830",
+          "text": "공덕역(孔德驛, Gongdeok station)은 서울특별시 마포구 공덕동과 도화동에 위치한 수도권 전철 5호선과 서울 지하철 6호선, 인천국제공항철도, 그리고 수도권 전철 경의·중앙선의 환승역이다. 서울 지하철 6호선은 심야에 2편성이 주박한다. 수도권 전철 5호선은 이 역부터 여의나루역까지 섬식 승강장이다. 서울 지하철 6호선은 이 역에만 상대식 승강장이다. 인천국제공항철도는 이 역부터 홍대입구역까지 상대식 승강장이다.\n\n\n== 역사 ==\n1996년 12월 30일 : 서울 지하철 5호선 여의도 - 왕십리 구간 개통과 함께 영업 개시\n2000년 12월 15일 : 서울 지하철 6호선 봉화산 - 응암순환 구간 개통과 함께 환승역이 됨\n2011년 11월 30일 : 인천국제공항철도 개통과 함께 3개 노선 환승역이 됨\n2012년 12월 15일 : 수도권 전철 경의선 공덕 ~ 디지털미디어시티 구간 개통과 함께 4개 노선 환승역이 됨\n2014년 12월 27일 : 수도권 전철 경의선 공덕 ~ 용산 구간 개통과 함께 문산역 ~ 용문역간 수도권 전철 경의·중앙선 직결 운행 개시로 중간역이 됨",
+          "metadata": {
+            "fingerprint": "f3692a1f8cf4e4d579f0e010febb2870c6abe91df34c38212203fa66730fb4d5",
+            "attribution": "한국어 위키백과 기여자; https://ko.wikipedia.org/w/index.php?title=%EA%B3%B5%EB%8D%95%EC%97%AD&action=history",
+            "source_url": "https://ko.wikipedia.org/w/index.php?oldid=42263294",
+            "chunk_overlap": 200,
+            "license": "CC BY-SA 4.0",
+            "chunk_size": 1000,
+            "chunk_index": 0,
+            "observed_at": "2026-08-07T11:36:47Z",
+            "revision_id": "42263294",
+            "document_id": "wikipedia:15105",
+            "kind": "external",
+            "title": "공덕역",
+            "item_id": "1144010200"
+          },
+          "cosine": 0.5008492337273396,
+          "citation": 2
+        },
+        {
+          "id": "7ca19690f44106dbc4d09824f0f3ef71aa4fed8cb41cc84173b9e6fa1ba79849",
+          "text": "== 역 구조 ==\n5호선은 1면 2선의 섬식 승강장이고, 나머지 노선은 모두 2면 2선의 상대식 승강장이다. 모든 승강장에 스크린도어가 설치되어 있다. 출구는 서울교통공사 소속 8개, 공항철도, 한국철도공사 소속 2개로 총 10개가 있다.\n현재 5호선과 6호선이 거의 L에 가까운 십(十)자 교차를 하고 있다. 5호선이 아래에, 6호선이 위에 있다. 공항철도와 경의·중앙선(용산선)은 6호선과 나란히 놓여 있다. 5호선으로 내려가는 통로는 엘리베이터와 계단이 모두 있으며 높이차가 크고 가파른 경사를 이룬다. 그 뒤에도 덜 가파른 내리막과 오르막이 각각 하나씩 있으며 엘리베이터와 계단이 모두 설치되어 있다. 갈아타는 데 약 5~6분 정도 소요된다.\n공항철도의 승강장은 다른 노선보다 아래인 지하 5층에 있으며 벽으로 막힌 승강장은 용산역행 열차가 사용할 예정이고, 경의·중앙선의 승강장은 지하 2층에 있다.\n\n\n=== 승강장 ===\n\n\n==== 서울교통공사 ====\n\n\n===== 5호선 승강장 (B3F) =====\n\n\n====== 배선도 ======\n\n\n===== 6호선 승강장 (B2F) =====\n\n\n==== 공항철도 (B5F) ====\n\n\n==== 한국철도공사 (B2F) ====\n\n\n=== 환승 ===\n공항철도, 경의·중앙선 대합실에서 5호선, 6호선 1~8번 출구를 이용할 경우 경의선 공덕역의 역장은 개표 후 지상을 이용해 다시 8번이나 7번 출구를 이용해 지하로 내려가 찾아가라는 안내를 제공한다.\n\n\n== 역 주변 ==\n공덕역을 중심으로 부도심이 형성되어 있으며, 아현뉴타운을 중심으로 재개발이 진행되고 있다.\n1번 출구\n\n\n== 이용객 변동 ==\n6호선의 2000년 자료는 개통일인 2000년 12월 15일부터 12월 31일까지 총 17일간, 공항철도의 2011년 자료는 개통일인 2011년 11월 30일부터 12월 31일까지 32일간, 용산선의 2012년 자료는 개통일인 2012년 12월 15일부터 12월 31일까지 17일간의 집계를 반영한 것이다.",
+          "metadata": {
+            "license": "CC BY-SA 4.0",
+            "title": "공덕역",
+            "revision_id": "42263294",
+            "document_id": "wikipedia:15105",
+            "attribution": "한국어 위키백과 기여자; https://ko.wikipedia.org/w/index.php?title=%EA%B3%B5%EB%8D%95%EC%97%AD&action=history",
+            "chunk_index": 1,
+            "fingerprint": "64b53e5b1bf1627d0f076b2ff95fec5ad7698958b3a1aeb625a53253c475ccd7",
+            "source_url": "https://ko.wikipedia.org/w/index.php?oldid=42263294",
+            "chunk_overlap": 200,
+            "item_id": "1144010200",
+            "chunk_size": 1000,
+            "observed_at": "2026-08-07T11:36:47Z",
+            "kind": "external"
+          },
+          "cosine": 0.4395750758475724,
+          "citation": 3
+        },
+        {
+          "id": "b908e7f4ad4b4b2282baddaecd2f2eac02c4b06e8267e7def56c9822c1010b72",
+          "text": "마포구(麻浦區)는 대한민국 서울특별시의 서부에 있는 구로, 1949년에 서대문구에서 분리되어 출범했다. 동쪽으로 중구·용산구, 북쪽으로는 서대문구·은평구와 접하고, 남쪽으로는 한강을 경계로 강서구·영등포구, 서쪽으로는 경기도 고양시 덕양구와 경계를 이룬다.\n은평구와 더불어 본래 서대문구였다가 분리된 자치구로, 고양시와도 맞대기 때문에 범 서대문구권인 서울특별시 시내버스 7권역에 해당하는 지역이다.\n\n\n== 지명 ==\n마포의 지명 유래에 관해 두 가지가 전한다. 이 지역에는 호수가 세 군데 있어서 삼포로 불렸는데 한국어의 '삼'자에 해당하는 한자어 '마'자가 붙음으로써 마포가 되었다는 설이 있다. 하지만 이곳 물가에 베옷을 짓는 마가 많이 재배되어 마포가 되었다는 설도 있다.\n\n\n== 역사 ==",
+          "metadata": {
+            "source_url": "https://ko.wikipedia.org/w/index.php?oldid=42625439",
+            "title": "마포구",
+            "observed_at": "2026-10-08T00:51:19Z",
+            "fingerprint": "54163104cfe0bf7e50094c2985c4775c2d9db634895d4a1c87f9bc35384e367e",
+            "chunk_index": 0,
+            "attribution": "한국어 위키백과 기여자; https://ko.wikipedia.org/w/index.php?title=%EB%A7%88%ED%8F%AC%EA%B5%AC&action=history",
+            "item_id": "1144010200",
+            "chunk_overlap": 200,
+            "license": "CC BY-SA 4.0",
+            "kind": "external",
+            "chunk_size": 1000,
+            "revision_id": "42625439",
+            "document_id": "wikipedia:5857"
+          },
+          "cosine": 0.1742010088267317,
+          "citation": 4
+        }
+      ],
+      "timings": {
+        "embedding_ms": 336.0677999444306,
+        "vector_ms": 3.050799947232008,
+        "selection_ms": 7.65539996791631,
+        "total_ms": 348.3602999476716
+      },
+      "notice": null
+    }
+  ]
+}

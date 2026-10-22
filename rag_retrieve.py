@@ -3,7 +3,7 @@ from time import perf_counter
 import math
 
 def cosine(a,b):
-    if len(a)!=len(b) or not a:
+    if len(a)!=len(b) or len(a)==0:
         raise ValueError('벡터 차원을 확인해주세요.')
     denominator=math.sqrt(sum(x*x for x in a)*sum(x*x for x in b))
     return sum(x*y for x,y in zip(a,b))/denominator if denominator else 0.0

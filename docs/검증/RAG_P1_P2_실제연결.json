@@ -1,0 +1,41 @@
+{
+  "prompt_version": "prepare-v1",
+  "model": "gpt-5.4-nano",
+  "item_id": "1144010200",
+  "queries": [
+    "공덕동 교통 현황",
+    "공덕역 교통 환승 노선",
+    "공덕역 주변 버스 정류장"
+  ],
+  "own_document": "wikipedia:803942",
+  "own_cache_hit": false,
+  "own_index": {
+    "chunks": 1,
+    "embedded": 0,
+    "removed": 0
+  },
+  "candidate_count": 6,
+  "selected": [
+    {
+      "id": "5857",
+      "reason": "마포구의 교통망 속에서 공덕역이 마포구에서 가장 많은 노선이 교차하는 역이라고 설명하며, 경의·중앙선과 인천국제공항철도 등의 노선을 함께 언급해 교통 전반 파악에 직접적이다."
+    },
+    {
+      "id": "15105",
+      "reason": "공덕역(공덕동·도화동 위치), 5호선·6호선, 인천국제공항철도, 경의·중앙선 환승역임을 구체적으로 다루어 질문의 핵심인 공덕역 교통을 직접 설명한다."
+    }
+  ],
+  "accepted": [
+    {
+      "id": "5857",
+      "reason": "마포구의 교통망 속에서 공덕역이 마포구에서 가장 많은 노선이 교차하는 역이라고 설명하며, 경의·중앙선과 인천국제공항철도 등의 노선을 함께 언급해 교통 전반 파악에 직접적이다.",
+      "source_url": "https://ko.wikipedia.org/w/index.php?oldid=42625439"
+    },
+    {
+      "id": "15105",
+      "reason": "공덕역(공덕동·도화동 위치), 5호선·6호선, 인천국제공항철도, 경의·중앙선 환승역임을 구체적으로 다루어 질문의 핵심인 공덕역 교통을 직접 설명한다.",
+      "source_url": "https://ko.wikipedia.org/w/index.php?oldid=42263294"
+    }
+  ],
+  "excluded": []
+}
