@@ -6,6 +6,8 @@ from pathlib import Path
 from map_view import build_map_html
 from bike_data import load_stations, SOURCE_URL
 from geo import stations_within
+from seoul_api import fetch_citydata, SeoulDataError
+from city_view import render_citydata
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -263,6 +265,24 @@ if conditions is not None:
                 )
 
 
+city_data = None
+with st.sidebar:
+    st.divider()
+    st.subheader("서울 현재 상황")
+    st.caption("공식 제공 장소만 조회할 수 있습니다. 선택한 직장 위치와 자동 연결된 데이터가 아닙니다.")
+    with st.form("citydata_form"):
+        city_area = st.text_input("공식 장소명 / 코드", value="광화문·덕수궁")
+        city_submitted = st.form_submit_button("현재 상황 조회")
+    if city_submitted:
+        st.session_state.pop("city_data", None)
+        seoul_key = os.getenv("SEOUL_OPEN_DATA_API_KEY", "").strip()
+        try:
+            with st.spinner("서울시 도시데이터를 조회합니다..."):
+                st.session_state.city_data = fetch_citydata(city_area, seoul_key)
+        except SeoulDataError as error:
+            st.warning(str(error))
+    city_data = st.session_state.get("city_data")
+
 nearby_stations = []
 with st.sidebar:
     st.divider()
@@ -308,6 +328,9 @@ with map_column:
                 {"대여소":x["name"], "직장에서 직선거리(m)":x["distance_m"]}
                 for x in nearby_stations
             ], hide_index=True)
+
+    if city_data:
+        render_citydata(city_data)
 
 with chat_column:
     st.subheader("집.착과 대화하기")

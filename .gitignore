@@ -25,3 +25,5 @@ __pycache__/
 # 운영체제 파일
 .DS_Store
 Thumbs.db
+# 빈 설정 예시는 공유
+!.env.example
