@@ -14,6 +14,17 @@ DISTRICTS = dict(zip(
     ['종로구','중구','용산구','성동구','광진구','동대문구','중랑구','성북구','강북구','도봉구','노원구','은평구','서대문구','마포구','양천구','강서구','구로구','금천구','영등포구','동작구','관악구','서초구','강남구','송파구','강동구'],
     ['11110','11140','11170','11200','11215','11230','11260','11290','11305','11320','11350','11380','11410','11440','11470','11500','11530','11545','11560','11590','11620','11650','11680','11710','11740']))
 
+KEY_NAMES = {
+    '아파트': 'DATA_GO_KR_APT_RENT_KEY',
+    '연립다세대': 'DATA_GO_KR_RH_RENT_KEY',
+    '단독다가구': 'DATA_GO_KR_SH_RENT_KEY',
+    '오피스텔': 'DATA_GO_KR_OFFI_RENT_KEY',
+}
+
+def service_keys(environment):
+    common = environment.get('DATA_GO_KR_SERVICE_KEY', '').strip()
+    return {category: environment.get(name, '').strip() or common for category, name in KEY_NAMES.items()}
+
 class RentDataError(ValueError):
     pass
 
@@ -112,13 +123,17 @@ def fetch_category(category, district_code, month, service_key, max_pages=5):
 
 def fetch_rents(district_code,month,categories,service_key):
     validate_query(district_code,month,categories)
-    if not service_key.strip():
-        raise RentDataError('.env에 DATA_GO_KR_SERVICE_KEY를 입력하고 앱을 다시 실행해주세요. 선택한 주택 유형마다 공공데이터포털 활용신청이 필요합니다.')
+    keys = service_key if isinstance(service_key, dict) else {category:service_key for category in categories}
+    if not any(keys.get(category, '').strip() for category in categories):
+        raise RentDataError('선택한 주택 유형의 전월세 API 키를 .env에 설정하고 앱을 다시 실행해주세요. 유형별 키 이름은 .env.example을 참고해주세요.')
     rows=[]
     statuses=[]
     for category in dict.fromkeys(categories):
         try:
-            result=fetch_category(category,district_code,month,service_key)
+            key = keys.get(category, '').strip()
+            if not key:
+                raise RentDataError(f'.env에 {KEY_NAMES[category]}를 설정해주세요. 이 유형은 조회하지 않았습니다.')
+            result=fetch_category(category,district_code,month,key)
             rows+=result.pop('rows')
             statuses.append({'category':category,**result,'error':None})
         except RentDataError as error:

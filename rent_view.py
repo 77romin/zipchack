@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta, timezone
 import os
 import streamlit as st
-from rent_api import DISTRICTS, SOURCES, RentDataError, fetch_rents, filter_budget
+from rent_api import DISTRICTS, SOURCES, RentDataError, fetch_rents, filter_budget, service_keys, KEY_NAMES
 
 def render_rents(conditions):
     st.subheader('예산 안의 전월세 거래 기록')
@@ -16,15 +16,17 @@ def render_rents(conditions):
             categories=st.multiselect('주택 유형',list(SOURCES),default=['연립다세대','단독다가구','오피스텔'],key='rent_categories')
             submitted=st.form_submit_button('전월세 실거래 조회')
         st.caption('선택한 구·한 달만 조회하며 직장 반경이나 통근시간으로 선택된 범위가 아닙니다. 유형당 최대 5페이지를 조회합니다.')
-        if not os.getenv('DATA_GO_KR_SERVICE_KEY','').strip():
-            st.info('실거래 조회를 사용하려면 DATA_GO_KR_SERVICE_KEY를 설정해주세요. 아래 링크에서 필요한 주택 유형별 활용신청을 할 수 있습니다.')
+        configured = service_keys(os.environ)
+        missing = [category for category in categories if not configured[category]]
+        if missing:
+            st.info('키 미설정: ' + ', '.join(missing) + '. 각 서비스의 키를 .env.example의 유형별 항목에 입력해주세요.')
             for category,(_,identifier) in SOURCES.items():
                 st.link_button(category+' 전월세 API 신청',f'https://www.data.go.kr/data/{identifier}/openapi.do')
     if submitted:
         st.session_state.pop('rent_result',None)
         try:
             with st.spinner('공식 전월세 거래 기록을 불러오고 있어요...'):
-                st.session_state.rent_result=fetch_rents(DISTRICTS[district],month.strip(),categories,os.getenv('DATA_GO_KR_SERVICE_KEY',''))
+                st.session_state.rent_result=fetch_rents(DISTRICTS[district],month.strip(),categories,service_keys(os.environ))
         except RentDataError as error:
             st.warning(str(error))
     result=st.session_state.get('rent_result')
