@@ -2,11 +2,14 @@
 import copy
 import json
 import requests
+from rent_api import DISTRICTS, SOURCES, validate_query, RentDataError
+from datetime import datetime,timedelta,timezone
 
 GMS_URL = 'https://gms.ssafy.io/gmsapi/api.openai.com/v1/chat/completions'
 DEFAULT_MODEL = 'gpt-5.4-nano'  # 저장소 ref/step0_llm.py의 실습 설정
 FIELDS = {'workplace', 'deal_type', 'deposit_max', 'rent_max', 'purchase_max',
-          'commute_minutes', 'commute_mode', 'preferred_ages', 'preferences'}
+          'commute_minutes', 'commute_mode', 'preferred_ages', 'preferences',
+          'district', 'deal_month', 'housing_types'}
 PREFERENCES = {'park', 'bike', 'subway', 'parking', 'ev', 'air', 'commerce', 'age'}
 PROMPT = """너는 집.착의 한국어 주거 조건 추출기다. 추천이나 사실 설명을 하지 않는다.
 사용자 발언에서 명시한 변경사항만 JSON 객체로 출력한다. 언급하지 않은 필드는 반드시 생략한다.
@@ -14,6 +17,11 @@ PROMPT = """너는 집.착의 한국어 주거 조건 추출기다. 추천이나
 '없음/더 없어/알려줘'는 추가 조건이 없다는 뜻이지 기존 조건 삭제가 아니다. 명시적으로 지울 조건을 지목한 경우에만 삭제한다.
 모호한 금액·수단은 추정하지 말고 생략한다. '상관없다/조건을 지워줘'는 해당 필드를 null로 출력한다.
 허용 필드:
+district: 사용자가 탐색하겠다고 지정한 서울 자치구 이름 하나(예: 중구, 마포구). 직장 주소의 구를 탐색 구로 추정하지 않는다.
+deal_month: 조회할 계약월 YYYYMM 문자열. '지난달'은 previous_month로 출력한다. 월만 말해 연도가 모호하면 생략한다.
+housing_types: 조회할 주택 유형 목록. 아파트/연립다세대/단독다가구/오피스텔 중 명시한 것만 추출한다.
+'빌라'는 연립다세대, '주택 유형은 상관없음/모든 유형'은 네 유형 전체다. '원룸'은 주택 유형이 아니므로 생략해 확인받는다.
+선호 없음과 조회 유형 상관없음을 구분한다. 탐색 지역·계약월·유형은 임의 기본값을 넣지 않는다.
 workplace: 직장 장소명/주소 문자열, deal_type: 월세/전세/매매,
 deposit_max: 최대 보증금(만원), rent_max: 최대 월세(만원), purchase_max: 최대 매매가(만원),
 commute_minutes: 최대 편도 통근시간(분), commute_mode: 대중교통/도보/자전거/자동차,
@@ -40,6 +48,25 @@ def validate_patch(patch):
     for key, value in patch.items():
         if value is None:
             result[key] = None
+        elif key == 'district':
+            if not isinstance(value,str) or value not in DISTRICTS:
+                raise ConversationError('조회할 서울 자치구 한 곳을 알려주세요. 예: 중구')
+            result[key]=value
+        elif key == 'deal_month':
+            if value == 'previous_month':
+                today=datetime.now(timezone(timedelta(hours=9)))
+                value=(today.replace(day=1)-timedelta(days=1)).strftime('%Y%m')
+            if not isinstance(value,str):
+                raise ConversationError('조회할 계약월을 YYYYMM 또는 지난달로 알려주세요.')
+            try:
+                validate_query('11140',value,['아파트'])
+            except RentDataError:
+                raise ConversationError('올바른 계약월을 YYYYMM 또는 지난달로 알려주세요.') from None
+            result[key]=value
+        elif key == 'housing_types':
+            if not isinstance(value,list) or not value or any(not isinstance(item,str) or item not in SOURCES for item in value):
+                raise ConversationError('아파트·연립다세대·단독다가구·오피스텔 중 조회할 유형을 알려주세요.')
+            result[key]=list(dict.fromkeys(value))
         elif key == 'workplace':
             if not isinstance(value, str) or not value.strip() or len(value) > 200:
                 raise ConversationError('직장 위치를 구체적으로 알려주세요.')

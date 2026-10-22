@@ -51,7 +51,7 @@ class ChatFlowTests(unittest.TestCase):
         with patch('chat_flow.extract_patch') as extract:
             app.chat_input[0].set_value('없음. 알려줘').run()
             extract.assert_not_called()
-        self.assertEqual(app.session_state['chat_stage'], 'waiting_for_data')
+        self.assertEqual(app.session_state['chat_stage'], 'query_conditions')
         self.assertEqual(app.session_state['conversation_conditions']['preferred_ages'], [20,30])
         self.assertEqual(len(app.exception), 0)
         next(button for button in app.button if button.key=='reset_housing_chat').click().run()

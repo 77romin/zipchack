@@ -2,7 +2,8 @@
 import os
 import streamlit as st
 from chat_conditions import ConversationError, map_conditions, DEFAULT_MODEL
-from chat_flow import collect_turn
+from chat_query import run_chat_turn
+from rent_api import service_keys
 
 def render_chat(score_context=None):
     st.subheader('집.착과 대화하기')
@@ -21,17 +22,25 @@ def render_chat(score_context=None):
             labels = {'workplace':'직장', 'deal_type':'거래 유형', 'deposit_max':'최대 보증금(만원)',
                       'rent_max':'최대 월세(만원)', 'purchase_max':'최대 매매가(만원)',
                       'commute_minutes':'최대 편도 통근시간(분)', 'commute_mode':'통근수단',
-                      'preferred_ages':'희망 주민 연령대', 'preferences':'생활 선호(0~5)'}
+                      'preferred_ages':'희망 주민 연령대', 'preferences':'생활 선호(0~5)',
+                      'district':'실거래 조회 자치구','deal_month':'조회 계약월','housing_types':'조회 주택 유형'}
             st.json({labels.get(key, key):value for key,value in current.items()})
     prompt = st.chat_input('예: 시청 출근, 보증금 천에 월세 70, 지하철 40분', max_chars=2000)
     if prompt:
         try:
             with st.spinner('말씀하신 조건을 정리하고 있어요...'):
-                updated, answer, asked, stage = collect_turn(
-                    prompt, current, history, os.getenv('GMS_KEY', ''),
-                    st.session_state.get('chat_optional_asked', False),
-                    os.getenv('GMS_MODEL', '').strip() or DEFAULT_MODEL,
-                    rental_result=st.session_state.get('rent_result'),lifestyle_context=score_context)
+                turn=run_chat_turn(
+                    prompt,current,history,os.getenv('GMS_KEY',''),service_keys(os.environ),
+                    st.session_state.get('chat_optional_asked',False),
+                    os.getenv('GMS_MODEL','').strip() or DEFAULT_MODEL,
+                    rental_result=st.session_state.get('rent_result'),lifestyle_context=score_context,
+                    cache=st.session_state.get('rent_query_cache'))
+                updated,answer,asked,stage=(turn[key] for key in ['conditions','answer','asked','stage'])
+            st.session_state.rent_query_cache=turn['cache']
+            if turn['result'] is None:
+                st.session_state.pop('rent_result',None)
+            else:
+                st.session_state.rent_result=turn['result']
             st.session_state.chat_optional_asked = asked
             st.session_state.chat_stage = stage
             st.session_state.conversation_conditions = updated
