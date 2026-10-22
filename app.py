@@ -5,7 +5,8 @@ import os
 from pathlib import Path
 from map_view import build_map_html
 from map_explore import map_card,read_boundaries
-from bike_data import load_stations, SOURCE_URL
+from bike_data import load_stations, bundled_stations, SOURCE_URL
+from map_data_view import map_region
 from geo import stations_within
 from seoul_api import fetch_citydata, SeoulDataError
 from city_view import render_citydata
@@ -313,7 +314,7 @@ if city_data:
         st.caption(f"조회 장소 시설 핀 {len(city_facilities)}개 · 직장 선택 시 탐색 반경 안의 좌표만 표시합니다.")
 
 nearby_stations = []
-bike_result=None
+bike_result=bundled_stations()
 with st.sidebar:
     st.divider()
     st.subheader("따릉이 대여소 위치")
@@ -337,6 +338,8 @@ with st.sidebar:
                 st.info("직장 위치를 선택하면 주변 대여소를 표시합니다.")
         except ValueError as error:
             st.warning(str(error))
+    elif bike_result:
+        st.caption(f"공식 기본 위치 {len(bike_result['stations']):,}개 · 2026년 6월 자료 · 실시간 재고 아님")
 
 with st.sidebar:
     st.divider()
@@ -390,14 +393,19 @@ with map_column:
     lifestyle_facilities=render_lifestyle(neighborhood,st.session_state.get("conversation_conditions") or conditions,bike_result,park_data)
     with map_slot:
         st.subheader("추천 지도")
+        map_neighborhood,map_month=map_region(neighborhood)
+        map_stations=[]
+        if bike_result and map_neighborhood:
+            map_stations=stations_within(bike_result['stations'],map_neighborhood['latitude'],map_neighborhood['longitude'],3)
+            st.caption(f"선택 동네 대표점 3km 안 따릉이 대여소 {len(map_stations)}곳 · 지도에서 켜고 끌 수 있어요.")
         if not kakao_javascript_key:
             st.warning(".env에 KAKAO_JAVASCRIPT_KEY를 설정해주세요.")
         else:
             radius_km = conditions.get("search_radius_km", 3.0) if conditions else 3.0
-            card=map_card(neighborhood,st.session_state.get('rent_result'),st.session_state.get('conversation_conditions') or conditions,
-                          bike_result,st.session_state.get('resident_data',{}),st.session_state.get('resident_month'))
+            card=map_card(map_neighborhood,st.session_state.get('rent_result'),st.session_state.get('conversation_conditions') or conditions,
+                          bike_result,st.session_state.get('resident_data',{}),map_month)
             st.iframe(
-                build_map_html(kakao_javascript_key, workplace_location, radius_km, nearby_stations, city_facilities+lifestyle_facilities, neighborhood,card,boundaries.get((neighborhood or {}).get('legal_code'))),
+                build_map_html(kakao_javascript_key, workplace_location, radius_km, map_stations, city_facilities+lifestyle_facilities, map_neighborhood,card,boundaries.get((map_neighborhood or {}).get('legal_code'))),
                 height=575,
             )
         st.caption("파란 원은 직선거리 탐색 범위이며 실제 통근 가능 영역이 아닙니다.")

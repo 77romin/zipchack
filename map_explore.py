@@ -32,7 +32,9 @@ def read_boundaries(content):
 def map_card(neighborhood,result,conditions,bikes,residents,month):
     if not neighborhood:return None
     text=[]
-    rows=filter_budget((result or {}).get('rows',[]),conditions or {})
+    code=neighborhood.get('legal_code')
+    same_district=bool(code and (result or {}).get('district_code')==code[:5])
+    rows=filter_budget((result or {}).get('rows',[]) if same_district else [],conditions or {})
     rows=[r for r in rows or [] if r['dong']==neighborhood.get('dong')]
     text.append('과거 계약 자료 · 현재 호가·매물 아님')
     if rows:

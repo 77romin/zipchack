@@ -32,7 +32,7 @@ TEMPLATE = r'''
 <div style="padding:8px;background:#f1f5f9;color:#0f172a;font-size:13px">
 <label><input type="checkbox" id="layer-bike" checked>따릉이 대여소</label>
 <label><input type="checkbox" id="layer-facility" checked>주변 시설</label>
-<label>연령 비율 <select id="layer-age"><option value="">기본 영역</option value="20">20대</option><option value="30">30대</option><option value="40">40대</option><option value="50">50대</option><option value="60">60대</option></select></label>
+<label>연령 비율 <select id="layer-age"><option value="">기본 영역</option><option value="20" selected>20대</option><option value="30">30대</option><option value="40">40대</option><option value="50">50대</option><option value="60">60대</option></select></label>
 <span id="age-note">선택 동네의 조회된 주민등록 자료만 표시</span></div>
 <div id="error" role="alert"></div><div id="map" aria-label="직장과 탐색 범위 지도"></div>
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=__KEY__&autoload=false"></script>
@@ -63,7 +63,7 @@ if(window.kakao && window.kakao.maps){
       kakao.maps.event.addListener(marker,'click',function(){
         const text = document.createElement('div');
         text.style.cssText='padding:12px;min-width:160px;max-width:260px;white-space:normal';
-        text.textContent='따릉이 '+station.name+' · 직장에서 직선 '+station.distance_m+'m';
+        text.textContent='따릉이 '+station.name+' · 선택 동네 대표점에서 직선 '+station.distance_m+'m';
         stationInfo.setContent(text);
         stationInfo.open(map,marker);
       });
@@ -131,6 +131,7 @@ if(window.kakao && window.kakao.maps){
       else{map.setCenter(position);map.setLevel(5);}
     }
 
+    document.getElementById('layer-age').onchange();
   });
 }else{fail();}
 </script></body></html>

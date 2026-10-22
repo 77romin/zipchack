@@ -1,0 +1,17 @@
+{
+  "source_url": "https://data.seoul.go.kr/dataList/OA-13252/F/1/datasetView.do",
+  "download_url": "https://datafile.seoul.go.kr/bigfile/iot/inf/nio_download.do?useCache=false",
+  "download_parameters": {
+    "infId": "OA-13252",
+    "seq": "24",
+    "infSeq": "2"
+  },
+  "data_month": "2026-06",
+  "downloaded_at": "2026-10-22T17:50:35.826037",
+  "row_count": 2789,
+  "excluded_rows": 2,
+  "original_sha256": "a2dcee10a341ac9d6beaf14f83c1e46b38bc96ffc8289340508b01cac0d464f1",
+  "normalized_sha256": "879c8ff4e1bdf534ce6626058ad57f9ba82f85ed3ae15a01d0afa72ce5ef6409",
+  "license": "공공누리 제1유형: 출처표시",
+  "scope": "대여소 위치만. 실시간 재고 아님"
+}

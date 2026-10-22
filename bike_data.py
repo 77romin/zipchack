@@ -51,8 +51,10 @@ def load_stations(content, filename, *, aliases=None):
             for key, names in aliases.items():
                 if normalize(value) in names:
                     candidate[key] = col
-        if {"name", "latitude", "longitude"} <= candidate.keys():
-            columns, header_index = candidate, index
+        # 공식 XLSX는 대여소명과 위도·경도가 서로 다른 병합 헤더 행에 있다.
+        columns.update(candidate)
+        if {"name", "latitude", "longitude"} <= columns.keys():
+            header_index = index
             break
     if header_index is None:
         raise ValueError("대여소명·위도·경도 열을 찾지 못했습니다. 공식 대여소 위치 자료인지 확인해주세요.")
@@ -78,3 +80,15 @@ def load_stations(content, filename, *, aliases=None):
     if not stations:
         raise ValueError("서울 지역의 유효한 대여소 좌표가 없습니다.")
     return {"stations":stations, "skipped":skipped}
+
+
+def bundled_stations():
+    from pathlib import Path
+    import json,hashlib
+    path=Path(__file__).resolve().parent/'data/bikes_seoul.csv'
+    manifest=json.loads(path.with_suffix('.source.json').read_text(encoding='utf-8'))
+    if hashlib.sha256(path.read_bytes()).hexdigest()!=manifest['normalized_sha256']:
+        raise ValueError('따릉이 위치 스냅샷 해시를 확인해주세요.')
+    data=load_stations(path.read_bytes(),path.name)
+    return {**data,'source_url':manifest['source_url'],'origin':'서울시 공식 위치 파일 · '+manifest['data_month'],
+            'queried_at':manifest['downloaded_at'],'skipped':manifest['excluded_rows']}
