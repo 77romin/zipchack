@@ -8,6 +8,8 @@ from bike_data import load_stations, SOURCE_URL
 from geo import stations_within
 from seoul_api import fetch_citydata, SeoulDataError
 from city_view import render_citydata
+from city_preferences import preference_controls, render_place_comparison
+from city_match import facility_markers
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -283,6 +285,24 @@ with st.sidebar:
             st.warning(str(error))
     city_data = st.session_state.get("city_data")
 
+with st.sidebar:
+    with st.expander("도시환경 비교 선호 설정"):
+        city_preferences = preference_controls()
+
+city_facilities = []
+if city_data:
+    with st.sidebar:
+        facility_layers = st.multiselect(
+            "도시데이터 시설 지도 레이어", ["주차장", "지하철역", "전기차충전소"],
+            default=["지하철역"], key="city_facility_layers",
+        )
+        layer_keys = {"주차장":"parking", "지하철역":"subways", "전기차충전소":"ev_stations"}
+        city_facilities = facility_markers(
+            city_data, [layer_keys[x] for x in facility_layers], workplace_location,
+            conditions.get("search_radius_km",3.0) if conditions else 3.0,
+        )
+        st.caption(f"조회 장소 시설 핀 {len(city_facilities)}개 · 직장 선택 시 탐색 반경 안의 좌표만 표시합니다.")
+
 nearby_stations = []
 with st.sidebar:
     st.divider()
@@ -316,7 +336,7 @@ with map_column:
     else:
         radius_km = conditions.get("search_radius_km", 3.0) if conditions else 3.0
         st.iframe(
-            build_map_html(kakao_javascript_key, workplace_location, radius_km, nearby_stations),
+            build_map_html(kakao_javascript_key, workplace_location, radius_km, nearby_stations, city_facilities),
             height=530,
         )
     st.caption("파란 원은 직선거리 탐색 범위이며 실제 통근 가능 영역이 아닙니다.")
@@ -331,6 +351,7 @@ with map_column:
 
     if city_data:
         render_citydata(city_data)
+    render_place_comparison(city_data, city_preferences)
 
 with chat_column:
     st.subheader("집.착과 대화하기")
