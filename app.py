@@ -332,16 +332,7 @@ with st.sidebar:
 map_column, chat_column = st.columns([2, 1], gap="large")
 
 with map_column:
-    st.subheader("추천 지도")
-    if not kakao_javascript_key:
-        st.warning(".env에 KAKAO_JAVASCRIPT_KEY를 설정해주세요.")
-    else:
-        radius_km = conditions.get("search_radius_km", 3.0) if conditions else 3.0
-        st.iframe(
-            build_map_html(kakao_javascript_key, workplace_location, radius_km, nearby_stations, city_facilities),
-            height=530,
-        )
-    st.caption("파란 원은 직선거리 탐색 범위이며 실제 통근 가능 영역이 아닙니다.")
+    map_slot=st.container()
 
     if nearby_stations:
         with st.expander("주변 따릉이 대여소 목록"):
@@ -351,7 +342,20 @@ with map_column:
                 for x in nearby_stations
             ], hide_index=True)
 
-    render_rents(st.session_state.get("conversation_conditions") or conditions)
+    neighborhood=render_rents(st.session_state.get("conversation_conditions") or conditions)
+    with map_slot:
+        st.subheader("추천 지도")
+        if not kakao_javascript_key:
+            st.warning(".env에 KAKAO_JAVASCRIPT_KEY를 설정해주세요.")
+        else:
+            radius_km = conditions.get("search_radius_km", 3.0) if conditions else 3.0
+            st.iframe(
+                build_map_html(kakao_javascript_key, workplace_location, radius_km, nearby_stations, city_facilities, neighborhood),
+                height=530,
+            )
+        st.caption("파란 원은 직선거리 탐색 범위이며 실제 통근 가능 영역이 아닙니다.")
+        if neighborhood:
+            st.caption('주황색 이름표는 선택 동네의 대표점입니다. 거래가 있었던 집의 위치나 실제 통근 가능 범위가 아닙니다.')
 
     if city_data:
         render_citydata(city_data)

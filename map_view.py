@@ -4,7 +4,7 @@ import math
 from urllib.parse import quote
 
 
-def build_map_html(javascript_key, workplace=None, radius_km=3.0, stations=None, facilities=None):
+def build_map_html(javascript_key, workplace=None, radius_km=3.0, stations=None, facilities=None, neighborhood=None):
     radius_km = float(radius_km)
     if not math.isfinite(radius_km) or not 0.5 <= radius_km <= 10:
         raise ValueError("탐색 반경은 0.5~10km여야 합니다.")
@@ -14,8 +14,12 @@ def build_map_html(javascript_key, workplace=None, radius_km=3.0, stations=None,
         if not (math.isfinite(lat) and math.isfinite(lon) and -90 <= lat <= 90 and -180 <= lon <= 180):
             raise ValueError("유효한 위도·경도가 필요합니다.")
         center = {"latitude": lat, "longitude": lon}
+    if neighborhood:
+        lat,lon=float(neighborhood['latitude']),float(neighborhood['longitude'])
+        if not (math.isfinite(lat) and math.isfinite(lon) and 37<=lat<=38 and 126<=lon<=128):
+            raise ValueError('서울 동네의 유효한 좌표가 필요합니다.')
     payload = json.dumps({"center": center, "workplace": bool(workplace),
-                          "stations": stations or [], "facilities": facilities or [], "radius_m": round(radius_km * 1000)}, ensure_ascii=False)
+                          "neighborhood": neighborhood, "stations": stations or [], "facilities": facilities or [], "radius_m": round(radius_km * 1000)}, ensure_ascii=False)
     # HTML의 script 종료 태그를 데이터로 삽입할 수 없게 한다.
     payload = payload.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
     return TEMPLATE.replace("__KEY__", quote(javascript_key, safe="")).replace("__DATA__", payload)
@@ -72,6 +76,26 @@ if(window.kakao && window.kakao.maps){
       circle.setMap(map);
       map.setBounds(circle.getBounds());
     }
+    if(data.neighborhood){
+      const neighborhood=data.neighborhood;
+      const position=new kakao.maps.LatLng(neighborhood.latitude,neighborhood.longitude);
+      const marker=new kakao.maps.Marker({map:map,position:position,title:neighborhood.name+' · 동네 대표 위치'});
+      const label=document.createElement('div');
+      label.style.cssText='padding:6px 10px;background:#c2410c;color:white;border-radius:8px;font-size:13px;white-space:nowrap';
+      label.textContent=neighborhood.name+' · 대표점';
+      new kakao.maps.CustomOverlay({map:map,position:position,content:label,yAnchor:2.6});
+      kakao.maps.event.addListener(marker,'click',function(){
+        const text=document.createElement('div');
+        text.style.cssText='padding:12px;min-width:190px;max-width:280px;white-space:normal';
+        text.textContent=neighborhood.name+' · 동네 대표 위치(개별 주택 아님) · 계약월 '+neighborhood.month+' · 예산에 맞는 조회 거래 '+neighborhood.count+'건';
+        stationInfo.setContent(text);stationInfo.open(map,marker);
+      });
+      const bounds=new kakao.maps.LatLngBounds();
+      bounds.extend(position);
+      if(data.workplace){bounds.extend(center);map.setBounds(bounds);}
+      else{map.setCenter(position);map.setLevel(5);}
+    }
+
   });
 }else{fail();}
 </script></body></html>

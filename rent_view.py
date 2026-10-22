@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 import os
 import streamlit as st
 from housing_candidates import build_candidates
+from neighborhood_api import resolve_neighborhood, NeighborhoodError
 from rent_api import DISTRICTS, SOURCES, RentDataError, fetch_rents, filter_budget, service_keys, KEY_NAMES
 
 def render_rents(conditions):
@@ -61,11 +62,29 @@ def render_rents(conditions):
                    '주택 유형별 건수':', '.join(f'{key} {value}건' for key,value in group['categories'].items()),
                    '최근 계약일':group['latest']} for group in candidates['groups']],hide_index=True)
     st.caption('예산에 맞는 조회 거래 건수 내림차순입니다. 종합 추천 순위·현재 매물 수가 아닙니다. 오른쪽 대화에서 “추천해줘”라고 하면 동일한 근거를 안내합니다.')
-    dong=st.selectbox('거래를 살펴볼 동네',['전체']+[group['dong'] for group in candidates['groups']],key='candidate_dong')
+    dong=st.selectbox('거래를 살펴볼 동네',['전체']+[group['dong'] for group in candidates['groups']],key=f"candidate_dong_{result['district_code']}_{result['month']}")
+    neighborhood=None
     if dong!='전체':
+        cache=st.session_state.setdefault('neighborhood_locations',{})
+        cache_key=result['district_code']+':'+dong
+        if st.button('선택 동네 지도에 표시',key='show_candidate_neighborhood'):
+            try:
+                if cache_key not in cache:
+                    with st.spinner('동네의 대표 위치를 확인하고 있어요...'):
+                        cache[cache_key]=resolve_neighborhood(result['district_code'],dong,os.getenv('KAKAO_REST_API_KEY',''))
+            except NeighborhoodError as error:
+                st.warning(str(error))
+        if cache_key in cache:
+            group=next(group for group in candidates['groups'] if group['dong']==dong)
+            neighborhood={**cache[cache_key],'count':group['count'],'month':result['month']}
+            st.caption(f"지도: {neighborhood['name']} 대표 위치 · 개별 주택 좌표나 동네 경계가 아닙니다. 좌표 확인 {neighborhood['queried_at']}")
+        else:
+            st.caption('위치 표시 버튼을 누르면 선택 동네만 조회합니다. 확인하지 못한 위치는 지도에 표시하지 않습니다.')
         filtered=[row for row in filtered if row['dong']==dong]
     st.dataframe([{'유형':row['category'],'법정동':row['dong'],'건물명':row['name'] or '미제공',
                    '계약일':row['contract_date'],'보증금(만원)':row['deposit'],'월세(만원)':row['monthly_rent'],
                    '면적(㎡)':row['area'],'면적 기준':row['area_type'],'계약 구분':row['contract_type'] or '미제공'}
                   for row in sorted(filtered,key=lambda row:row['contract_date'],reverse=True)],hide_index=True)
     st.caption('최신 계약일 순입니다. 적합도 순위가 아닙니다. 대화에서 예산을 바꾸면 저장된 조회 기록에 즉시 다시 적용합니다. 관리비·공원·거주민 연령·통근시간은 이 필터에 포함되지 않습니다.')
+
+    return neighborhood
