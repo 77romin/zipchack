@@ -91,4 +91,4 @@ def bundled_stations():
         raise ValueError('따릉이 위치 스냅샷 해시를 확인해주세요.')
     data=load_stations(path.read_bytes(),path.name)
     return {**data,'source_url':manifest['source_url'],'origin':'서울시 공식 위치 파일 · '+manifest['data_month'],
-            'data_month':manifest['data_month'],'queried_at':manifest['downloaded_at'],'skipped':manifest['excluded_rows']}
+            'license':manifest['license'],'data_month':manifest['data_month'],'queried_at':manifest['downloaded_at'],'skipped':manifest['excluded_rows']}

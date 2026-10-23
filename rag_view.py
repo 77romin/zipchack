@@ -9,7 +9,7 @@ from rag_pipeline import build_graph,run
 ROOT=Path(__file__).resolve().parent
 
 
-def answer_candidate(point,context,question,mode):
+def answer_candidate(point,context,question,mode,k=4):
     """자료 묶음별 색인으로 다른 사용자·대표점의 근거 혼입을 방지한다."""
     from hashlib import sha256
     from dataclasses import asdict
@@ -27,12 +27,26 @@ def answer_candidate(point,context,question,mode):
     index=Index(ROOT/'storage/rag_candidates'/identity,GmsEmbeddings(key,model),model)
     try:
         indexed=index.put_many(sources)
-        result=run(build_graph(index,key,os.getenv('GMS_MODEL','').strip() or 'gpt-5.4-nano'),code,question,mode=mode)
-        result['preparation']={'item_id':code,'documents':len(sources),'embedded':sum(r['embedded'] for r in indexed),'snapshot':identity}
+        preparation=prepare_external(index,code,question,key)
+        result=run(build_graph(index,key,os.getenv('GMS_MODEL','').strip() or 'gpt-5.4-nano'),code,question,mode=mode,k=k)
+        result['preparation']={'item_id':code,'documents':len(sources),'embedded':sum(r['embedded'] for r in indexed),'snapshot':identity,'external':preparation}
         return result
     finally:index.close()
 
-def answer_question(item_id,question,mode):
+def prepare_external(index,code,question,key):
+    from rag_prepare import prepare
+    from wiki_documents import TITLES
+    if code not in TITLES:
+        return {'status':'unsupported','notice':'자체 위키 문서 연결 미검증: 공식 자료만 사용합니다.'}
+    item=next(row for row in load_neighborhoods()[0] if row['code']==code)
+    try:
+        return prepare(item,question,key,ROOT/'storage/preparation',index,os.getenv('WIKI_CONTACT',''),
+                       os.getenv('GMS_MODEL','').strip() or 'gpt-5.4-nano')
+    except ValueError:
+        return {'status':'failed','notice':'외부 문서 확장 실패: 이미 준비된 근거만 검색합니다.'}
+
+
+def answer_question(item_id,question,mode,k=4):
     if not (ROOT/'storage/rag/chroma.sqlite3').exists():
         raise ValueError('근거 색인이 없습니다. 자료 준비와 색인을 먼저 실행해주세요.')
     key=os.getenv('GMS_KEY','').strip()
@@ -40,22 +54,56 @@ def answer_question(item_id,question,mode):
     model=os.getenv('RAG_EMBEDDING_MODEL','').strip() or 'text-embedding-3-small'
     index=Index(ROOT/'storage/rag',GmsEmbeddings(key,model),model)
     try:
-        return run(build_graph(index,key,os.getenv('GMS_MODEL','').strip() or 'gpt-5.4-nano'),
-                   item_id,question,mode=mode)
+        preparation=prepare_external(index,item_id,question,key)
+        result=run(build_graph(index,key,os.getenv('GMS_MODEL','').strip() or 'gpt-5.4-nano'),
+                   item_id,question,mode=mode,k=k)
+        result['external_preparation']=preparation
+        return result
     finally:index.close()
+
+def source_kind(source):
+    if source['kind']=='metadata':return '동네 메타데이터'
+    url=source.get('source_url','')
+    if 'wikipedia.org/' in url:return '위키백과'
+    if 'data.seoul.go.kr/' in url:return '서울시 공식 시설 자료'
+    if 'data.go.kr/' in url:return '공공데이터 공식 통계/API'
+    return '외부 문서'
+
+
+def safe_error(error):
+    text=str(error)
+    if 'GMS_KEY' in text:return 'GMS_KEY가 없습니다. .env 설정 후 다시 실행해주세요.'
+    if '색인이 없습니다' in text:return '근거 색인이 없습니다. 색인 준비 명령을 먼저 실행해주세요.'
+    return '근거 처리를 완료하지 못했습니다. 자료·모델·네트워크 상태를 확인해주세요.'
+
 
 def show_answer(result):
     if result.get('preparation'):
         p=result['preparation']
         st.caption(f"추천 근거 대상: {p['item_id']} · 준비 문서 {p['documents']}개 · 새 임베딩 {p['embedded']}개")
+    preparation=result.get('external_preparation') or result.get('preparation',{}).get('external')
+    if preparation:
+        with st.expander('검색어·문서 선별 기록'):
+            st.json(preparation)
+    retrieval=result.get('retrieval',{})
+    if retrieval:
+        with st.expander('검색한 근거 전체 · Top-k 검증'):
+            st.caption(f"외부 근거 Top-k {retrieval.get('k')} · 실제 외부 청크 {retrieval.get('external_count')} · 메타데이터 별도 포함")
+            for row in retrieval.get('evidence',[]):
+                st.write(f"[{row['citation']}] {row['metadata']['title']}")
+                st.caption(row['id'])
+            import json
+            st.download_button('검색·답변 기록 JSON 저장',json.dumps(result,ensure_ascii=False,indent=2),
+                               file_name='rag_evidence.json',mime='application/json',key='download-'+str(id(result)))
     st.markdown(result['answer'])
+    st.caption('부동산·법률·금융 전문가의 조언을 대신하지 않습니다. 계약 전 원문과 현장을 확인하세요.')
     if result.get('abstained'):st.info('자료가 부족해 답변을 유보했습니다.')
     citations=result.get('citations',[])
     if citations:
         with st.expander('답변에 사용한 근거'):
             for source in citations:
                 numbers=', '.join(str(n) for n in source['numbers'])
-                kind='동네 메타데이터' if source['kind']=='metadata' else '외부 문서'
+                kind=source_kind(source)
                 st.write(f"[{numbers}] {source['title']} · {kind}")
                 st.link_button('원문 보기',source['source_url'])
                 st.caption('자료 시점: '+source['observed_at'])
@@ -83,9 +131,10 @@ def render_rag(neighborhood=None):
             st.session_state.rag_follow_item=suggested
             st.rerun()
     mode=st.radio('근거 검색 방식',['similarity','mmr'],format_func=lambda m:'유사도' if m=='similarity' else 'MMR',horizontal=True,key='rag_mode')
+    k=st.number_input('검색 근거 수 Top-k',min_value=1,max_value=20,value=4,key='rag_top_k')
     histories=st.session_state.setdefault('rag_histories',{})
     history=histories.setdefault(item_id,[])
-    st.caption('대화 기록은 동네별로 이 세션에서만 보관합니다. 외부 문서가 없는 동네는 메타데이터 범위만 답할 수 있습니다. 문서 수집은 이 화면에서 자동 실행하지 않습니다.')
+    st.caption('대화 기록은 동네별로 보관합니다. 자체 문서 연결이 검증된 5개 동네는 검색어 추출·후보 선별을 자동 실행하고, 같은 질문은 수집 캐시를 재사용합니다. 그 외 동네는 이미 준비된 근거만 사용합니다.')
     for turn in history:
         with st.chat_message('user'):st.write(turn['question'])
         with st.chat_message('assistant'):show_answer(turn['result'])
@@ -97,10 +146,11 @@ def render_rag(neighborhood=None):
         else:
             try:
                 with st.spinner('동네 근거를 검색하고 답변을 작성합니다...'):
-                    result=answer_question(item_id,question,mode)
+                    result=answer_question(item_id,question,mode) if k==4 else answer_question(item_id,question,mode,k=k)
                 histories[item_id]=(history+[{'question':question,'result':result}])[-10:]
                 st.rerun()
-            except Exception:
-                st.warning('답변을 완료하지 못했습니다. 색인·API 키·네트워크를 확인해주세요. 기존 대화는 유지됩니다.')
+            except Exception as error:
+                st.warning(safe_error(error))
+                st.caption('답변을 완료하지 못했습니다. 색인·API 키·네트워크를 확인해주세요. 기존 대화는 유지됩니다.')
     if st.button('이 동네 질문 기록 지우기',key='rag_clear'):
         histories[item_id]=[];st.rerun()

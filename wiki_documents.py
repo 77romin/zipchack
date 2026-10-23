@@ -61,6 +61,7 @@ def collect(item,title,cache_dir,contact='',refresh=False):
             if attempt==2:
                 raise ValueError('위키백과 연결 실패: 네트워크·API 사용 정책을 확인해주세요.') from None
             time.sleep(attempt+1)
+    time.sleep(.2 if contact else 6.1)
     source=parse_page(payload,item,title)
     record={'source':asdict(source),'fetched_at':datetime.now(timezone(timedelta(hours=9))).isoformat()}
     record['source_sha256']=sha256(json.dumps(record['source'],sort_keys=True,ensure_ascii=False).encode()).hexdigest()

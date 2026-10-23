@@ -14,6 +14,7 @@ P3='''서울 동네 정보를 설명하는 근거 기반 도우미다.
 가격·매물 존재·통근시간·현재 운행·거주 적합성을 자료 없이 추정하지 말라.
 문서 시점과 현재 시점을 혼동하지 말라. 주요 사실 주장 바로 뒤에 [근거번호]를 붙여라.
 근거가 부족하면 확인할 수 없는 부분을 명시하라. 전혀 답할 수 없으면 abstained=true로 반환하라.
+답변 유보 시에도 answer에는 사용자가 읽을 수 있는 완전한 한국어 문장을 쓰라. 'abstained=true' 같은 상태 문자열만 답하지 말라.
 JSON {"answer":"주장 [1] ...","abstained":false}만 출력하라. URL을 직접 만들지 말라.'''
 
 class State(TypedDict,total=False):
@@ -36,6 +37,9 @@ def validate_answer(data,evidence):
     if not isinstance(data,dict) or set(data)!={'answer','abstained'} or type(data['abstained']) is not bool or not isinstance(data['answer'],str) or not 1<=len(data['answer'].strip())<=12000:
         raise ValueError('답변 출력 형식이 올바르지 않습니다.')
     answer=data['answer'].strip()
+    if data['abstained'] and answer.lower().replace(' ','') in {'abstained=true','true'}:
+        answer='제공된 근거에서 확인할 수 없어 답변을 유보합니다.'
+    answer=re.sub(r'\[근거번호\s*:?\s*(\d+)\]',r'[\1]',answer)
     ids=[int(n) for n in re.findall(r'\[(\d+)\]',answer)]
     by_number={row['citation']:row for row in evidence}
     if any(n not in by_number for n in ids):raise ValueError('검색 근거에 없는 인용 번호입니다.')

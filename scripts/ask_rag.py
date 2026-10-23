@@ -11,12 +11,13 @@ def main():
     p=argparse.ArgumentParser(description='색인된 동네 근거로 LangGraph 답변 실행')
     p.add_argument('--item',required=True);p.add_argument('--question',required=True)
     p.add_argument('--mode',choices=['similarity','mmr'],default='similarity')
+    p.add_argument('--top-k',type=int,default=4)
     p.add_argument('--output',type=Path,default=ROOT/'storage/rag_answer.json')
     a=p.parse_args();index=None
     try:
         c=dotenv_values(ROOT/'.env');model=c.get('RAG_EMBEDDING_MODEL') or 'text-embedding-3-small'
         index=Index(ROOT/'storage/rag',GmsEmbeddings(c.get('GMS_KEY'),model),model)
-        result=run(build_graph(index,c.get('GMS_KEY')),a.item,a.question,mode=a.mode)
+        result=run(build_graph(index,c.get('GMS_KEY')),a.item,a.question,mode=a.mode,k=a.top_k)
         a.output.parent.mkdir(parents=True,exist_ok=True)
         a.output.write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
         print(result['answer']);print(json.dumps(result['citations'],ensure_ascii=False,indent=2));return 0

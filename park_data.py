@@ -74,5 +74,5 @@ def bundled_parks():
     manifest=json.loads((folder/'parks_seoul.source.json').read_text(encoding='utf-8'))
     result.update(origin='서울시 공식 CSV 스냅샷 · API 실조회 아님',
                   queried_at=manifest['downloaded_at'],source_updated_at=manifest['dataset_updated_at'],
-                  skipped=manifest['excluded_rows'],source_url=manifest['source_url'])
+                  skipped=manifest['excluded_rows'],source_url=manifest['source_url'],license=manifest['license'])
     return result

@@ -19,15 +19,19 @@ JSON {"selected":[{"id":"후보 id","reason":"관련 이유"}]}만 출력하라.
 
 def ask(prompt,data,key,model='gpt-5.4-nano'):
     if not key or not key.strip():raise ValueError('GMS_KEY가 필요합니다.')
-    try:
-        response=requests.post('https://gms.ssafy.io/gmsapi/api.openai.com/v1/chat/completions',
-            headers={'Authorization':'Bearer '+key.strip()},json={'model':model,
-            'messages':[{'role':'system','content':prompt},{'role':'user','content':json.dumps(data,ensure_ascii=False)}],
-            'response_format':{'type':'json_object'},'max_completion_tokens':1200},timeout=(5,45))
-        response.raise_for_status()
-        return json.loads(response.json()['choices'][0]['message']['content'])
-    except (requests.RequestException,ValueError,KeyError,IndexError,TypeError):
-        raise ValueError('문서 준비 AI 요청에 실패했습니다. 키·모델·네트워크를 확인해주세요.') from None
+    for attempt in range(3):
+        try:
+            response=requests.post('https://gms.ssafy.io/gmsapi/api.openai.com/v1/chat/completions',
+                headers={'Authorization':'Bearer '+key.strip()},json={'model':model,
+                'messages':[{'role':'system','content':prompt},{'role':'user','content':json.dumps(data,ensure_ascii=False)}],
+                'response_format':{'type':'json_object'},'max_completion_tokens':1200},timeout=(5,45))
+            response.raise_for_status()
+            return json.loads(response.json()['choices'][0]['message']['content'])
+        except (requests.RequestException,ValueError,KeyError,IndexError,TypeError) as error:
+            retry=isinstance(error,(requests.Timeout,requests.ConnectionError)) or isinstance(error,requests.HTTPError) and error.response is not None and error.response.status_code in (502,503,504)
+            if retry and attempt<2:
+                time.sleep(.5*(attempt+1));continue
+            raise ValueError('문서 준비 AI 요청에 실패했습니다. 키·모델·네트워크를 확인해주세요.') from None
 
 def validate_queries(data):
     if not isinstance(data,dict) or set(data)!={'queries'} or not isinstance(data['queries'],list) or not 1<=len(data['queries'])<=3:
@@ -51,6 +55,7 @@ class WikiSearch:
         self.folder=Path(folder);self.folder.mkdir(parents=True,exist_ok=True)
         self.headers={'User-Agent':'Zipchack/0.1 ('+(contact or 'local educational RAG project')+')'}
         self.interval=.2 if contact else 6.1
+        self.requests=0
 
     def query(self,params):
         identity=sha256(json.dumps(params,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
@@ -58,6 +63,7 @@ class WikiSearch:
         if path.exists():return json.loads(path.read_text(encoding='utf-8'))
         for attempt in range(3):
             try:
+                self.requests+=1
                 response=requests.get(API,params={**params,'action':'query','format':'json','maxlag':5},headers=self.headers,timeout=(5,25))
                 response.raise_for_status();data=response.json()
                 if data.get('error'):raise ValueError()
@@ -91,10 +97,17 @@ class WikiSearch:
             '한국어 위키백과 기여자; https://ko.wikipedia.org/w/index.php?title='+quote(title,safe='')+'&action=history')
 
 def prepare(item,question,key,folder,index,contact='',model='gpt-5.4-nano'):
+    started=time.perf_counter()
     if not isinstance(question,str) or not 1<=len(question.strip())<=2000:raise ValueError('질문은 1~2000자로 입력해주세요.')
     # 검증된 자체 문서 매핑이 없는 항목은 다른 문서를 자체 문서로 추정하지 않는다.
     if item['code'] not in TITLES:raise ValueError('이 동네는 자체 문서 연결을 먼저 검증해야 합니다.')
     folder=Path(folder)
+    identity=sha256(json.dumps([item,question.strip(),model,PROMPT_VERSION],sort_keys=True,ensure_ascii=False).encode()).hexdigest()
+    plan=folder/'plans'/(identity+'.json')
+    if plan.exists():
+        cached=json.loads(plan.read_text(encoding='utf-8'))
+        index.put_many([Source(**source) for source in cached['sources']])
+        return {**cached['report'],'question_cache_hit':True,'collection_requests':0,'prepare_ms':(time.perf_counter()-started)*1000}
     own,hit=collect(item,TITLES[item['code']],folder/'own',contact)
     # 자체 문서는 P1/P2·길이·제외 결과보다 우선한다.
     own_result=index.put(own)
@@ -105,11 +118,19 @@ def prepare(item,question,key,folder,index,contact='',model='gpt-5.4-nano'):
         for candidate in wiki.search(item['full_name']+' '+query):
             if candidate['id']!=own.document_id.split(':',1)[1]:candidates[candidate['id']]=candidate
     selected=validate_selection(ask(P2,{'item':item,'question':question,'candidates':list(candidates.values())},key,model),list(candidates.values())) if candidates else []
-    accepted=[];excluded=[]
+    accepted=[];excluded=[{'id':c['id'],'reason':'P2 미선택'} for c in candidates.values() if c['id'] not in {r['id'] for r in selected}]
+    sources=[own]
     for row in selected:
         source=wiki.document(candidates[row['id']],item)
         if source is None:excluded.append({'id':row['id'],'reason':'본문의 동네·지역 연결 미확인'});continue
+        sources.append(source)
         index.put(source);accepted.append({'id':row['id'],'reason':row['reason'],'source_url':source.source_url})
-    return {'prompt_version':PROMPT_VERSION,'model':model,'item_id':item['code'],'queries':queries,
+    report={'prompt_version':PROMPT_VERSION,'model':model,'item_id':item['code'],'queries':queries,
         'own_document':own.document_id,'own_cache_hit':hit,'own_index':own_result,
-        'candidate_count':len(candidates),'selected':selected,'accepted':accepted,'excluded':excluded}
+        'candidate_count':len(candidates),'candidates':list(candidates.values()),'selected':selected,'accepted':accepted,'excluded':excluded,
+        'question_cache_hit':False,'collection_requests':wiki.requests+int(not hit),'prepare_ms':(time.perf_counter()-started)*1000}
+    plan.parent.mkdir(parents=True,exist_ok=True)
+    temporary=plan.with_suffix('.tmp')
+    temporary.write_text(json.dumps({'report':report,'sources':[asdict(source) for source in sources]},ensure_ascii=False),encoding='utf-8')
+    temporary.replace(plan)
+    return report
