@@ -1,5 +1,7 @@
 # 집.착
 
+**[제출파일](submission/AI%20%EC%BD%94%EC%96%B4%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%202_%5B%EC%A7%91.%EC%B0%A9%5D_%EC%84%9C%EC%9A%B8_11%EB%B0%98_%EA%B9%80%EA%B0%95%EB%AF%BC.zip)** · 셀프·마예은 상호 점검본 포함
+
 <p align="center">
   <img src="assets/zipchack-profile.png" alt="집을 꼭 껴안고 행복해하는 집착 서비스 캐릭터" width="360">
 </p>
