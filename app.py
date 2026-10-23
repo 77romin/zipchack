@@ -32,7 +32,7 @@ from dotenv import load_dotenv
 # 다른 화면 출력보다 먼저 설정
 st.set_page_config(
     page_title="집.착",
-    page_icon="🏠",
+    page_icon=str(Path(__file__).resolve().parent / "assets" / "zipchack-profile.png"),
     layout="wide",
     initial_sidebar_state="collapsed",
 )

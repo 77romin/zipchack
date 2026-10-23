@@ -1,5 +1,9 @@
 # 집.착
 
+<p align="center">
+  <img src="assets/zipchack-profile.png" alt="집을 꼭 껴안고 행복해하는 집착 서비스 캐릭터" width="360">
+</p>
+
 > **내 맘에 착, 내 삶에 착.**
 >
 > 대화로 조건을 정하고, 지도에서 동네를 비교하고, 추천 이유를 근거로 확인합니다.
