@@ -1,3 +1,4 @@
+from ui_helpers import complete_chat
 import unittest
 from unittest.mock import patch
 from datetime import datetime,timedelta,timezone
@@ -80,6 +81,7 @@ class ChatQueryTests(unittest.TestCase):
         app.session_state['chat_optional_asked']=True
         with patch('chat_flow.extract_patch',return_value={'district':'중구','deal_month':'202609','housing_types':['오피스텔']}),patch('chat_query.fetch_rents',return_value=result()) as fetch:
             app.chat_input[0].set_value('중구 지난달 오피스텔').run()
+            complete_chat(app)
             self.assertEqual(fetch.call_count,1)
             self.assertEqual(app.session_state['chat_stage'],'candidates')
             self.assertIn('신당동',app.session_state['housing_chat'][-1]['content'])

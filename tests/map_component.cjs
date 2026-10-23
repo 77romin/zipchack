@@ -2,7 +2,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
 const code=fs.readFileSync('map_component/bridge.js','utf8').replace('export default function','function mount');
 const updates=[],values=[],handlers=new Set();let loads=0;
 const child={postMessage(value){updates.push(value);}};
-const frame={contentWindow:child,dataset:{},set srcdoc(value){loads++;this.html=value;}};
+const frame={contentWindow:child,dataset:{},style:{},set srcdoc(value){loads++;this.html=value;}};
 const parentElement={querySelector(){return frame;}};
 const window={addEventListener(name,h){handlers.add(h);},removeEventListener(name,h){handlers.delete(h);}};
 const context={window};vm.runInNewContext(code,context);
@@ -17,5 +17,12 @@ receive({source:child,data:{type:'zipchack:viewport',viewport:{south:37.5,west:1
 assert.equal(values.at(-1)[0],'viewport');assert.equal(values.at(-1)[1].west,127);
 const before=values.length;receive({source:{},data:{type:'zipchack:viewport',viewport:{}}});assert.equal(values.length,before);
 render({html:'new-location',navigation:'dong-b',regions:[],explore:null});assert.equal(loads,2);
+render({html:'new-location',navigation:'dong-b',regions:[],busy:true});
+const count=values.length;
+[...handlers][0]({source:child,data:{type:'zipchack:viewport',viewport:{south:37.4,west:127,north:37.5,east:127.1}}});
+assert.equal(values.length,count,'대화 처리 중 지도 이벤트는 백엔드 실행을 끊지 않음');
+render({html:'new-location',navigation:'dong-b',regions:[],busy:false});
+assert.equal(values.length,count+1,'대화 완료 후 최신 범위를 한 번 전달');
+assert.equal(values.at(-1)[1].south,37.4);
 cleanup();assert.equal(handlers.size,0);
 console.log('지도 범위 전달·색상 갱신 시 프레임 유지·이벤트 정리·외부 메시지 거부 통과');

@@ -54,6 +54,16 @@ class ChatTests(unittest.TestCase):
             with self.assertRaises(ConversationError): extract_patch('시청', {}, [], '')
             post.assert_not_called()
 
+    def test_temporary_gateway_error_retries_without_retrying_auth(self):
+        failed=Mock(status_code=502)
+        success=Mock(status_code=200);success.json.return_value={'choices':[{'message':{'content':'{"rent_max":60}'}}]}
+        with patch('chat_conditions.requests.post',side_effect=[failed,success]) as post,patch('chat_conditions.time.sleep'):
+            self.assertEqual(extract_patch('60으로',{},[],'test'),{'rent_max':60})
+            self.assertEqual(post.call_count,2)
+        with patch('chat_conditions.requests.post',return_value=Mock(status_code=401)) as post:
+            with self.assertRaises(ConversationError):extract_patch('60으로',{},[],'test')
+            self.assertEqual(post.call_count,1)
+
     def test_malformed_response(self):
         response = Mock(status_code=200)
         response.json.return_value = {'choices':[{'message':{'content':'not JSON'}}]}

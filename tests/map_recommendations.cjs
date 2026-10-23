@@ -1,0 +1,15 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const elements=new Map();const layers=[];let fits=0;
+const document={getElementById(id){if(!elements.has(id))elements.set(id,{textContent:''});return elements.get(id);},createElement(){return {style:{},setAttribute(){},addEventListener(name,fn){this.click=fn;}};}};
+const map={setBounds(){fits++;},setLevel(){}};
+const kakao={maps:{LatLng:class{},LatLngBounds:class{extend(){}},CustomOverlay:class{constructor(options){this.options=options;this.map=options.map;layers.push(this);}setMap(value){this.map=value;}}}};
+const context={document,kakao};vm.runInNewContext(fs.readFileSync('map_recommendations.js','utf8'),context);
+let clicked;
+const row={dong:'신당동',label:'참고 1',provisional:true,point:{latitude:37.5,longitude:127}};
+const pins=context.createRecommendations(map,r=>clicked=r,[row]);
+assert.equal(layers.length,1);assert.equal(fits,1);layers[0].options.content.click();assert.equal(clicked.dong,'신당동');
+pins.update([row]);assert.equal(layers.length,1);assert.equal(fits,1,'자료만 재전달하면 지도를 재이동하지 않음');
+pins.update([{...row,label:'참고 2'}]);assert.equal(layers[0].map,null);assert.equal(layers[1].options.content.textContent,'참고 2');
+pins.update([]);assert(layers.every(layer=>layer.map===null));assert.equal(elements.get('recommendation-note').textContent,'');
+pins.update([{...row,point:{latitude:NaN,longitude:127}}]);assert.equal(layers.length,2);
+console.log('추천 핀 갱신·이전 핀 제거·동일 자료 지도 유지·클릭·잘못된 좌표 제외 통과');

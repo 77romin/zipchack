@@ -2,6 +2,7 @@
 import copy
 import json
 import requests
+import time
 from rent_api import DISTRICTS, SOURCES, validate_query, RentDataError
 from datetime import datetime,timedelta,timezone
 
@@ -137,10 +138,18 @@ def extract_patch(message, current, history, api_key, model=DEFAULT_MODEL):
                  for item in history[-12:] if item['role'] in {'user', 'assistant'}]
     messages.append({'role': 'user', 'content': message})
     try:
-        response = requests.post(GMS_URL, headers={'Authorization': 'Bearer ' + api_key.strip()},
-                                 json={'model': model, 'messages': messages,
-                                       'response_format': {'type': 'json_object'}, 'max_completion_tokens': 1200},
-                                 timeout=(5, 45))
+        for attempt in range(3):
+            try:
+                response = requests.post(GMS_URL, headers={'Authorization': 'Bearer ' + api_key.strip()},
+                                         json={'model': model, 'messages': messages,
+                                               'response_format': {'type': 'json_object'}, 'max_completion_tokens': 1200},
+                                         timeout=(5,45))
+            except (requests.Timeout,requests.ConnectionError):
+                if attempt==2:raise
+                time.sleep(.5*(2**attempt));continue
+            if response.status_code in {502,503,504} and attempt<2:
+                time.sleep(.5*(2**attempt));continue
+            break
         if response.status_code in {401, 403}:
             raise ConversationError('GMS 인증 또는 접근 권한을 확인해주세요. 기존 조건은 유지했습니다.')
         if response.status_code == 429:

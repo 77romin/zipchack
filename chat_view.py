@@ -5,6 +5,60 @@ from chat_conditions import ConversationError, map_conditions, DEFAULT_MODEL
 from chat_query import run_chat_turn
 from rent_api import service_keys
 from rag_view import answer_question,show_answer
+from recommendations import prepare_candidates
+
+from concurrent.futures import ThreadPoolExecutor,TimeoutError
+from copy import deepcopy
+
+_JOBS=ThreadPoolExecutor(max_workers=4)
+
+
+def process_request(prompt,current,history,score_context,commute_context,result,cache,asked,use_rag,mode,item_id,key,keys,model,failures,runner,rag_call):
+    prepared={}
+    def prepare(result,conditions,context):
+        prepared.update(prepare_candidates(result,conditions,context,failures))
+        return prepared
+    turn=runner(prompt,current,history,key,keys,asked,model,rental_result=result,lifestyle_context=score_context,
+                cache=cache,commute_context=commute_context,prepare_context=prepare)
+    assistant={'role':'assistant','content':turn['answer']}
+    if use_rag:
+        if not item_id:assistant['rag_error']='검색할 동네가 아직 없습니다. 지도 위치를 확인해주세요.'
+        else:
+            try:assistant['rag_result']=rag_call(item_id,prompt,mode)
+            except Exception:assistant['rag_error']='근거 답변을 완료하지 못했습니다. 입력한 조건은 저장했어요. 사이드바에서 색인·연결 상태를 확인해주세요.'
+    return turn,assistant,prepared,failures
+
+
+def finish_request(job):
+    try:
+        turn,assistant,prepared,failures=job['future'].result()
+        updated=turn['conditions']
+        st.session_state.rent_query_cache=turn['cache']
+        if turn['result'] is None:st.session_state.pop('rent_result',None)
+        else:st.session_state.rent_result=turn['result']
+        st.session_state.chat_optional_asked=turn['asked']
+        st.session_state.chat_stage=turn['stage']
+        st.session_state.conversation_conditions=updated
+        if prepared:
+            st.session_state.setdefault('neighborhood_locations',{}).update(prepared['points'])
+            st.session_state.setdefault('resident_data',{}).update(prepared['residents'])
+        st.session_state.recommendation_failures=failures
+        mapped=map_conditions(updated)
+        if mapped:st.session_state.housing_conditions=mapped
+        elif (st.session_state.get('housing_conditions') or {}).get('source')=='conversation':st.session_state.housing_conditions=None
+    except ConversationError as error:assistant={'role':'assistant','content':str(error)}
+    except Exception:assistant={'role':'assistant','content':'처리를 완료하지 못했습니다. 기존 조건은 유지했어요. 연결 상태를 확인한 뒤 다시 입력해주세요.'}
+    st.session_state.housing_chat=(job['history']+[{'role':'user','content':job['prompt']},assistant])[-40:]
+    st.session_state.pop('housing_job',None);st.session_state.pop('pending_housing_prompt',None)
+    st.rerun()
+
+
+@st.fragment(run_every=.5)
+def poll_request():
+    job=st.session_state.get('housing_job')
+    if job and job['future'].done():st.rerun()
+    if job:st.info('조건과 동네 자료를 확인하고 있어요. 잠시만 기다려주세요.')
+
 
 def render_chat(score_context=None,commute_context=None,neighborhood=None):
     st.subheader('집.착과 대화하기')
@@ -16,6 +70,7 @@ def render_chat(score_context=None,commute_context=None,neighborhood=None):
         st.caption('근거 검색 동네: '+(neighborhood or {}).get('name','미선택')+' · 저장된 문서 기준')
     history = st.session_state.setdefault('housing_chat', [])
     current = st.session_state.setdefault('conversation_conditions', {})
+    active_job=st.session_state.get('housing_job')
     with st.container(border=True, height=500):
         if not history:
             with st.chat_message('assistant'):
@@ -25,6 +80,8 @@ def render_chat(score_context=None,commute_context=None,neighborhood=None):
                 st.write(item['content'])
                 if item.get('rag_result'):show_answer(item['rag_result'])
                 if item.get('rag_error'):st.caption(item['rag_error'])
+        if active_job:
+            with st.chat_message('user'):st.write(active_job['prompt'])
     if current:
         with st.sidebar.expander('대화에서 정리한 조건'):
             labels = {'workplace':'직장', 'deal_type':'거래 유형', 'deposit_max':'최대 보증금(만원)',
@@ -33,53 +90,30 @@ def render_chat(score_context=None,commute_context=None,neighborhood=None):
                       'preferred_ages':'희망 주민 연령대', 'preferences':'생활 선호(0~5)',
                       'district':'실거래 조회 자치구','deal_month':'조회 계약월','housing_types':'조회 주택 유형'}
             st.json({labels.get(key, key):value for key,value in current.items()})
-    prompt = st.chat_input('예: 시청 출근, 보증금 천에 월세 70, 지하철 40분', max_chars=2000)
-    if prompt:
-        try:
-            with st.spinner('말씀하신 조건을 정리하고 있어요...'):
-                turn=run_chat_turn(
-                    prompt,current,[{'role':item['role'],'content':item['content']} for item in history],os.getenv('GMS_KEY',''),service_keys(os.environ),
-                    st.session_state.get('chat_optional_asked',False),
-                    os.getenv('GMS_MODEL','').strip() or DEFAULT_MODEL,
-                    rental_result=st.session_state.get('rent_result'),lifestyle_context=score_context,
-                    cache=st.session_state.get('rent_query_cache'),commute_context=commute_context)
-                updated,answer,asked,stage=(turn[key] for key in ['conditions','answer','asked','stage'])
-            st.session_state.rent_query_cache=turn['cache']
-            if turn['result'] is None:
-                st.session_state.pop('rent_result',None)
-            else:
-                st.session_state.rent_result=turn['result']
-            st.session_state.chat_optional_asked = asked
-            st.session_state.chat_stage = stage
-            st.session_state.conversation_conditions = updated
-            mapped = map_conditions(updated)
-            if mapped:
-                st.session_state.housing_conditions = mapped
-            elif (st.session_state.get('housing_conditions') or {}).get('source') == 'conversation':
-                st.session_state.housing_conditions = None
-            assistant={'role':'assistant','content':answer}
-            if use_rag:
-                item_id=(neighborhood or {}).get('legal_code')
-                if not item_id:
-                    assistant['rag_error']='검색할 동네가 아직 없습니다. 지도 위치를 확인해주세요.'
-                else:
-                    try:
-                        with st.spinner('동네 문서에서 근거를 검색합니다...'):
-                            assistant['rag_result']=answer_question(item_id,prompt,mode)
-                    except Exception:
-                        assistant['rag_error']='근거 답변을 완료하지 못했습니다. 입력한 조건은 저장했어요. 사이드바에서 색인·연결 상태를 확인해주세요.'
-            st.session_state.housing_chat = (history + [
-                {'role':'user','content':prompt}, assistant])[-40:]
-            st.rerun()
-        except ConversationError as error:
-            st.warning(str(error))
-    with st.sidebar:
-        reset=st.button('대화와 대화 조건 초기화',key='reset_housing_chat')
+    job=st.session_state.get('housing_job')
+    if job and job['future'].done():finish_request(job)
+    prompt=st.chat_input('예: 시청 출근, 보증금 천에 월세 70, 지하철 40분',max_chars=2000,key='housing_message',disabled=bool(job))
+    if prompt and not job:
+        clean_history=[{'role':item['role'],'content':item['content']} for item in history]
+        future=_JOBS.submit(process_request,prompt,deepcopy(current),clean_history,deepcopy(score_context),deepcopy(commute_context),
+            deepcopy(st.session_state.get('rent_result')),deepcopy(st.session_state.get('rent_query_cache')),
+            st.session_state.get('chat_optional_asked',False),use_rag,mode,(neighborhood or {}).get('legal_code'),
+            os.getenv('GMS_KEY',''),service_keys(os.environ),os.getenv('GMS_MODEL','').strip() or DEFAULT_MODEL,
+            dict(st.session_state.get('recommendation_failures',{})),run_chat_turn,answer_question)
+        job={'future':future,'prompt':prompt,'history':list(history)}
+        st.session_state.housing_job=job;st.session_state.pending_housing_prompt=prompt
+        # 즉시 완료되는 작업은 같은 실행에서 반영하고, 긴 API 작업은 화면과 분리한다.
+        try:future.result(timeout=.1)
+        except TimeoutError:pass
+        except Exception:pass  # 완료 처리에서 사용자에게 안전한 안내를 남긴다.
+        if future.done():finish_request(job)
+        st.rerun()
+    if job:poll_request()
+    with st.sidebar:reset=st.button('대화와 대화 조건 초기화',key='reset_housing_chat')
     if reset:
-        st.session_state.housing_chat = []
-        st.session_state.conversation_conditions = {}
-        st.session_state.chat_optional_asked = False
-        st.session_state.chat_stage = 'collecting'
-        if (st.session_state.get('housing_conditions') or {}).get('source') == 'conversation':
-            st.session_state.housing_conditions = None
+        if job:job['future'].cancel()
+        st.session_state.pop('housing_job',None);st.session_state.pop('pending_housing_prompt',None)
+        st.session_state.housing_chat=[];st.session_state.conversation_conditions={}
+        st.session_state.chat_optional_asked=False;st.session_state.chat_stage='collecting'
+        if (st.session_state.get('housing_conditions') or {}).get('source')=='conversation':st.session_state.housing_conditions=None
         st.rerun()

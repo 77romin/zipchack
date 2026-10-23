@@ -24,3 +24,50 @@ class ChatRagTests(unittest.TestCase):
             search.side_effect=None
             app.chat_input[0].set_value('유사도 질문').run()
             self.assertEqual(search.call_args.args[-1],'similarity')
+
+    def test_prompt_survives_map_triggered_rerun(self):
+        from threading import Event
+        release=Event();calls=[]
+        def slow(message,*args,**kwargs):
+            calls.append(message);release.wait(5)
+            return {'conditions':{},'answer':'처리 완료','asked':False,'stage':'collecting','result':None,'cache':{}}
+        with patch('chat_view.run_chat_turn',side_effect=slow):
+            app=AppTest.from_string('from chat_view import render_chat\nrender_chat()').run()
+            app.chat_input[0].set_value('지도 갱신 중 입력').run()
+            app.run();app.run()
+            self.assertEqual(calls,['지도 갱신 중 입력'])
+            release.set();app.session_state['housing_job']['future'].result(timeout=5)
+            app.run()
+            self.assertEqual(len(app.exception),0)
+            self.assertEqual(len(app.session_state['housing_chat']),2)
+            self.assertNotIn('pending_housing_prompt',app.session_state)
+
+    def test_reset_discards_late_background_reply(self):
+        from threading import Event
+        release=Event()
+        def slow(*args,**kwargs):
+            release.wait(5)
+            return {'conditions':{'rent_max':70},'answer':'이전 요청 답변','asked':False,'stage':'collecting','result':None,'cache':{}}
+        with patch('chat_view.run_chat_turn',side_effect=slow):
+            app=AppTest.from_string('from chat_view import render_chat\nrender_chat()').run()
+            app.chat_input[0].set_value('처리 중 초기화').run()
+            future=app.session_state['housing_job']['future']
+            app.button(key='reset_housing_chat').click().run()
+            release.set();future.result(timeout=5);app.run()
+            self.assertEqual(app.session_state['housing_chat'],[])
+            self.assertEqual(app.session_state['conversation_conditions'],{})
+            self.assertNotIn('housing_job',app.session_state)
+
+    def test_job_merges_data_loaded_while_request_was_running(self):
+        from concurrent.futures import Future
+        turn={'conditions':{},'answer':'완료','asked':False,'stage':'collecting','result':None,'cache':{}}
+        future=Future();future.set_result((turn,{'role':'assistant','content':'완료'},
+            {'points':{'new':{'legal_code':'new'}},'residents':{'new':{'total':1}}},{}))
+        app=AppTest.from_string('from chat_view import render_chat\nrender_chat()').run()
+        app.session_state['neighborhood_locations']={'loaded_during_job':{}}
+        app.session_state['resident_data']={'loaded_during_job':{}}
+        app.session_state['housing_job']={'future':future,'prompt':'질문','history':[]}
+        app.run()
+        self.assertEqual(len(app.exception),0)
+        self.assertEqual(set(app.session_state['resident_data']),{'new','loaded_during_job'})
+        self.assertEqual(set(app.session_state['neighborhood_locations']),{'new','loaded_during_job'})

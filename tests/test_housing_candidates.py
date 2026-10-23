@@ -1,3 +1,4 @@
+from ui_helpers import complete_chat
 import unittest
 from unittest.mock import patch
 from pathlib import Path
@@ -79,6 +80,7 @@ class HousingCandidateTests(unittest.TestCase):
         select=next(s for s in app.selectbox if s.label=='거래를 살펴볼 동네')
         select.select('신당동').run()
         app.chat_input[0].set_value('추천해줘').run()
+        complete_chat(app)
         self.assertEqual(app.session_state['chat_stage'],'candidates')
         self.assertIn('신당동',app.session_state['housing_chat'][-1]['content'])
         self.assertEqual(len(app.exception),0)

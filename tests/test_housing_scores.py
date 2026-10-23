@@ -1,3 +1,4 @@
+from ui_helpers import complete_chat
 import unittest
 from unittest.mock import patch
 from housing_scores import score_point,compare_candidates,score_reply,preference_weights,selected_ages
@@ -84,6 +85,7 @@ class HousingScoreTests(unittest.TestCase):
         app.session_state['park_data']=PARKS
         app.run()
         app.chat_input[0].set_value('추천해줘').run()
+        complete_chat(app)
         self.assertIn('생활 선호 비교',app.session_state['housing_chat'][-1]['content'])
         self.assertIn('100/100',app.session_state['housing_chat'][-1]['content'])
         self.assertEqual(len(app.exception),0)

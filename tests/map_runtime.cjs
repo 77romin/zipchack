@@ -2,7 +2,7 @@
 const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/strict');
 const source=fs.readFileSync(process.argv[2],'utf8');
 const elements=new Map();const objects=[];const events=[];const canvasOps=[];
-function el(kind){const result={value:'20',checked:true,clientWidth:800,clientHeight:500,style:{},appendChild(){},setAttribute(){},addEventListener(){},textContent:''};
+function el(kind){const result={value:'20',checked:true,clientWidth:800,clientHeight:500,style:{},children:[],listeners:{},appendChild(child){this.children.push(child);},setAttribute(){},addEventListener(type,fn){this.listeners[type]=fn;},textContent:''};
  if(kind==='canvas')result.getContext=()=>new Proxy({beginPath(){},moveTo(){},lineTo(){},closePath(){},fill(rule){canvasOps.push(['fill',rule]);},drawImage(){canvasOps.push(['drawImage']);}}, {set(target,key,value){canvasOps.push([key,value]);target[key]=value;return true;}});
  return result;}
 const document={getElementById(id){if(!elements.has(id))elements.set(id,el());return elements.get(id);},createElement:el};
@@ -13,7 +13,8 @@ vm.runInNewContext(source,{window:{kakao:{maps},addEventListener(){}},kakao:{map
 assert(elements.get('age-note').textContent.includes('11'));
 elements.get('layer-bike').checked=false;elements.get('layer-bike').onchange();
 const area=events.find(e=>Array.isArray(e.object.options?.path));assert(area);area.callback();
-assert(objects.some(o=>o.content));
+const panel=elements.get('region-card');assert.equal(panel.hidden,false);
+panel.children[0].listeners.click();assert.equal(panel.hidden,true,'동네 패널 닫기');
 elements.get('layer-age').value='composition';elements.get('layer-age').onchange();
 assert(canvasOps.some(op=>op[0]==='filter' && op[1]==='blur(24px)'));
 assert(canvasOps.some(op=>op[0]==='globalCompositeOperation' && op[1]==='destination-in'));

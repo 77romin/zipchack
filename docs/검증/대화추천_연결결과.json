@@ -1,0 +1,55 @@
+{
+  "verified_date": "2026-10-23",
+  "scenario": "개발 검증용 조건. 실제 사용자의 주거 조건이 아님",
+  "scope": {
+    "district": "중구",
+    "month": "202609",
+    "housing_types": [
+      "오피스텔"
+    ],
+    "deposit_max": 1000
+  },
+  "baseline": {
+    "rent_max": 70,
+    "preferences": {
+      "park": 5,
+      "bike": 0,
+      "age": 0
+    },
+    "matched_transactions": 12,
+    "candidate_neighborhoods": 6
+  },
+  "budget_change": {
+    "rent_max": 60,
+    "matched_transactions": 3,
+    "candidate_neighborhoods": 3,
+    "ordered_neighborhoods": [
+      "광희동1가",
+      "오장동",
+      "황학동"
+    ],
+    "reused_saved_transactions": true
+  },
+  "preference_change": {
+    "preferences": {
+      "park": 0,
+      "bike": 5,
+      "age": 0
+    },
+    "gwanghui1_score_before": 77.0,
+    "gwanghui1_score_after": 93.2,
+    "nearest_bike_straight_distance_m": 102,
+    "order_changed_in_live_data": false
+  },
+  "rank_type": "참고 순위. 원자료 제외 기록이 있으며 주거 종합/통근/현재 매물의 검증된 순위 아님",
+  "python_tests_passed": 159,
+  "browser_verified": [
+    "대화 요청",
+    "후보 위치 자동 확인",
+    "지도 참고 번호",
+    "예산 변경",
+    "선호 변경",
+    "핀 근거 패널",
+    "패널 닫기"
+  ]
+}

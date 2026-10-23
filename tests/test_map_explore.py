@@ -62,3 +62,12 @@ class ExploreTests(unittest.TestCase):
         self.assertEqual(cards[0]['card']['age_rates'],{})
         self.assertEqual(cards[1]['card']['age_rates']['20'],40.)
         self.assertIn('동 경계 기준점(대략)',' '.join(cards[1]['card']['lines']))
+
+    def test_verified_candidate_point_is_shared_with_popup(self):
+        from map_explore import region_cards
+        region={'code':'1114016200','name':'서울특별시 중구 신당동','latitude':37.56,'longitude':127.0}
+        point={'legal_code':region['code'],'latitude':37.7,'longitude':127.0}
+        parks={'parks':[{'name':'대표점 공원','latitude':37.7,'longitude':127.0}]}
+        card=region_cards([region],None,None,{},None,parks,{},'202609',{'11140:신당동':point})[0]['card']
+        self.assertIn('주요 공원 1곳',' '.join(card['lines']))
+        self.assertNotIn('동 경계 기준점(대략)',' '.join(card['lines']))

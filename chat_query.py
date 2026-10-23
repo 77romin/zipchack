@@ -31,7 +31,7 @@ def same_query(result,conditions):
             and {status['category'] for status in result.get('statuses',[])}==set(conditions['housing_types']))
 
 def run_chat_turn(message,current,history,api_key,keys,optional_asked=False,model=DEFAULT_MODEL,
-                  rental_result=None,lifestyle_context=None,cache=None,commute_context=None):
+                  rental_result=None,lifestyle_context=None,cache=None,commute_context=None,prepare_context=None):
     cache=dict(cache or {})
     refresh=refresh_requested(message)
     updated,answer,asked,stage=collect_turn('추천해줘' if refresh else message,current,history,api_key,
@@ -73,7 +73,11 @@ def run_chat_turn(message,current,history,api_key,keys,optional_asked=False,mode
         output['cache']=cache
     answer=('저장된 조회 자료에 현재 조건을 다시 적용했어요. ' if reused else '말씀하신 범위의 공식 전월세 거래를 조회했어요. ')
     answer+=candidate_reply(result,updated)
-    if lifestyle_context is not None:
+    if prepare_context is not None:
+        from recommendations import recommendation_reply
+        lifestyle_context=prepare_context(result,updated,lifestyle_context or {})
+        answer+=recommendation_reply(result,updated,lifestyle_context)
+    elif lifestyle_context is not None:
         answer+=score_reply(result,updated,lifestyle_context)
     if commute_context is not None:
         answer+=commute_reply(result,updated,commute_context)

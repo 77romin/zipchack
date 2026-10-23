@@ -18,6 +18,7 @@ function createBikeViewport(map,stationInfo,initialStations){
         marker=new kakao.maps.CustomOverlay({map:null,content:icon,zIndex:5,position:new kakao.maps.LatLng(station.latitude,station.longitude)});
         markers.set(key,marker);
         icon.addEventListener('click',()=>{
+          const panel=document.getElementById('region-card');if(panel)panel.hidden=true;
           const text=document.createElement('div');text.style.cssText='padding:12px;max-width:260px;white-space:normal';
           text.textContent='따릉이 '+station.name+' · 대여소 위치 자료 · 실시간 자전거 재고 아님';
           stationInfo.setContent(text);stationInfo.setPosition(new kakao.maps.LatLng(station.latitude,station.longitude));stationInfo.open(map);

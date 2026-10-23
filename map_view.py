@@ -1,11 +1,18 @@
 """카카오 지도 HTML 생성. 서버 REST 키는 전달하지 않는다."""
 import json
 import math
+import hashlib
 from pathlib import Path
 from urllib.parse import quote
 
 
-def build_map_html(javascript_key, workplace=None, radius_km=3.0, stations=None, facilities=None, neighborhood=None, explore=None, geometry=None, age_regions=None):
+def map_asset_revision():
+    root=Path(__file__).resolve().parent
+    files=['map_view.py','map_gradient.js','map_bikes.js','map_recommendations.js']
+    return hashlib.sha256(b''.join((root/name).read_bytes() for name in files)).hexdigest()[:12]
+
+
+def build_map_html(javascript_key, workplace=None, radius_km=3.0, stations=None, facilities=None, neighborhood=None, explore=None, geometry=None, age_regions=None,recommendations=None):
     radius_km = float(radius_km)
     if not math.isfinite(radius_km) or not 0.5 <= radius_km <= 10:
         raise ValueError("탐색 반경은 0.5~10km여야 합니다.")
@@ -20,12 +27,13 @@ def build_map_html(javascript_key, workplace=None, radius_km=3.0, stations=None,
         if not (math.isfinite(lat) and math.isfinite(lon) and 37<=lat<=38 and 126<=lon<=128):
             raise ValueError('서울 동네의 유효한 좌표가 필요합니다.')
     payload = json.dumps({"center": center, "workplace": bool(workplace),
-                          "age_regions":age_regions or [],"explore":explore,"geometry":geometry,"neighborhood": neighborhood, "stations": stations or [], "facilities": facilities or [], "radius_m": round(radius_km * 1000)}, ensure_ascii=False)
+                          "recommendations":recommendations or [],"age_regions":age_regions or [],"explore":explore,"geometry":geometry,"neighborhood": neighborhood, "stations": stations or [], "facilities": facilities or [], "radius_m": round(radius_km * 1000)}, ensure_ascii=False)
     # HTML의 script 종료 태그를 데이터로 삽입할 수 없게 한다.
     payload = payload.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
     gradient=(Path(__file__).resolve().parent/'map_gradient.js').read_text(encoding='utf-8')
     bikes=(Path(__file__).resolve().parent/'map_bikes.js').read_text(encoding='utf-8')
-    return TEMPLATE.replace('__BIKE_CODE__',bikes).replace('__GRADIENT_CODE__',gradient).replace("__KEY__", quote(javascript_key, safe="")).replace("__DATA__", payload)
+    pins=(Path(__file__).resolve().parent/'map_recommendations.js').read_text(encoding='utf-8')
+    return TEMPLATE.replace('__RECOMMENDATION_CODE__',pins).replace('__BIKE_CODE__',bikes).replace('__GRADIENT_CODE__',gradient).replace("__KEY__", quote(javascript_key, safe="")).replace("__DATA__", payload)
 
 
 TEMPLATE = r'''
@@ -39,13 +47,15 @@ TEMPLATE = r'''
 <label>연령 지도 <select id="layer-age"><option value="composition" selected>20~39세 ↔ 60세 이상 구성</option><option value="">기본 영역</option><option value="20">20대 비율</option><option value="30">30대 비율</option><option value="40">40대 비율</option><option value="50">50대 비율</option><option value="60">60대 비율</option></select></label>
 <div style="display:flex;align-items:center;gap:8px;margin-top:6px"><span>20~39세 비중 우세</span><span style="display:inline-block;width:130px;height:12px;background:linear-gradient(to right,#16a34a,#facc15,#dc2626)"></span><span>60세 이상 비중 우세</span><span> · 자료 없음: 회색</span></div>
 <span id="age-note">선택 동네의 조회된 주민등록 자료만 표시</span></div>
+<div id="recommendation-note" style="padding:3px 8px;background:#eff6ff;color:#1e40af;font-size:12px"></div>
 <div id="bike-note" style="padding:3px 8px;background:#f1f5f9;color:#166534;font-size:12px"></div>
 <div id="viewport-status" role="status" style="padding:5px 8px;background:#eff6ff;color:#1d4ed8;font-size:12px">지도 화면 범위를 확인하고 있습니다…</div>
-<div id="error" role="alert"></div><div id="map" aria-label="직장과 탐색 범위 지도"></div>
+<div id="error" role="alert"></div><div style="position:relative"><div id="map" aria-label="직장과 탐색 범위 지도"></div><aside id="region-card" role="dialog" aria-label="동네 정보" hidden style="position:absolute;right:12px;top:12px;z-index:30;width:330px;max-width:calc(100% - 24px);background:white;border:1px solid #94a3b8;border-radius:10px;box-shadow:0 2px 10px #555"></aside></div>
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=__KEY__&autoload=false"></script>
 <script>
 __GRADIENT_CODE__
 __BIKE_CODE__
+__RECOMMENDATION_CODE__
 const data = __DATA__;
 function fail(){document.getElementById('error').textContent='지도 연결을 확인해주세요. 카카오맵 활성화, JavaScript 키, SDK 등록 도메인을 확인하세요.';}
 if(window.kakao && window.kakao.maps){
@@ -55,7 +65,7 @@ if(window.kakao && window.kakao.maps){
     map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
     const stationInfo = new kakao.maps.InfoWindow({removable:true,zIndex:20});
     function showRegionCard(name,card,position){
-      const box=document.createElement('div');box.style.cssText='padding:12px;width:290px;max-height:330px;overflow-y:auto;white-space:normal;color:#111;background:white;font-size:13px';
+      const box=document.createElement('div');box.style.cssText='padding:12px;max-height:400px;overflow-y:auto;white-space:normal;color:#111;background:white;font-size:13px';
       const heading=document.createElement('strong');heading.textContent=name+' · 동네 정보';box.appendChild(heading);
       const note=document.createElement('p');note.textContent='법정동 경계(2023 자료) · 개별 주택 아님';box.appendChild(note);
       (card?.lines||['자료 미확인']).forEach(line=>{const p=document.createElement('p');p.textContent=line;box.appendChild(p);});
@@ -64,7 +74,9 @@ if(window.kakao && window.kakao.maps){
         if(!/^https?:\/\//i.test(source.url||''))return;
         const link=document.createElement('a');link.textContent=source.title;link.href=source.url;link.target='_blank';link.rel='noopener noreferrer';link.style.cssText='display:block;margin-top:6px;color:#0369a1';box.appendChild(link);
       });
-      stationInfo.setContent(box);stationInfo.setPosition(position);stationInfo.open(map);
+      const panel=document.getElementById('region-card');panel.textContent='';panel.hidden=false;
+      const close=document.createElement('button');close.type='button';close.textContent='닫기';close.setAttribute('aria-label','동네 정보 닫기');close.style.cssText='float:right;margin:6px;cursor:pointer';close.addEventListener('click',()=>{panel.hidden=true;});panel.appendChild(close);panel.appendChild(box);
+      if(typeof stationInfo.close==='function')stationInfo.close();
     }
 
     const smoothAge=createAgeGradient(map,data);
@@ -154,6 +166,13 @@ if(window.kakao && window.kakao.maps){
       });
       });
     });
+    const recommendations=createRecommendations(map,(row,position)=>{
+      const region=(data.age_regions||[]).find(r=>r.code===row.point.legal_code);
+      const lines=[row.label+(row.label==='후보'?'':'위')+' · 생활 선호 '+(row.score===null?'미확인':row.score+'/100')];
+      row.details.forEach(detail=>lines.push(detail['항목']+': '+detail['근거']));
+      if(row.missing.length||row.issues.length)lines.push('미확인/제한: '+row.missing.concat(row.issues).join(', '));
+      showRegionCard(row.dong,{...(region?.card||{}),lines:lines.concat(region?.card?.lines||[])},position);
+    },data.recommendations,()=>{if(typeof stationInfo.close==='function')stationInfo.close();document.getElementById('region-card').hidden=true;});
     document.getElementById('layer-age').onchange();
     let lastViewportKey='';
     const viewportKey=bounds=>['south','west','north','east'].map(k=>Number(bounds[k]).toFixed(6)).join(':');
@@ -163,6 +182,7 @@ if(window.kakao && window.kakao.maps){
       const incoming=new Map((event.data.regions||[]).map(r=>[r.code,r]));
       (data.age_regions||[]).forEach(region=>{if(incoming.has(region.code))Object.assign(region,incoming.get(region.code));});
       if(event.data.explore)data.explore=event.data.explore;
+      if(event.data.recommendations)recommendations.update(event.data.recommendations);
       const status=event.data.status;
       if(status && status.bounds && viewportKey(status.bounds)===lastViewportKey){
         document.getElementById('viewport-status').textContent=status.message;

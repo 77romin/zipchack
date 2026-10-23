@@ -6,12 +6,13 @@ from kakao_api import search_workplace
 
 import os
 from pathlib import Path
-from map_view import build_map_html
+from map_view import build_map_html,map_asset_revision
 from map_explore import map_card,read_boundaries,region_cards
 from bike_data import load_stations, bundled_stations, SOURCE_URL
 from map_data_view import map_region,district_regions
 from boundary_data import bundled_boundaries
 from map_viewport import render_viewport,update_population
+from recommendations import recommendation_rows
 from geo import stations_within
 from seoul_api import fetch_citydata, SeoulDataError
 from city_view import render_citydata
@@ -407,6 +408,8 @@ with st.sidebar:
         render_rag(neighborhood)
     age_controls=st.expander('지도 연령 조회 상태·재시도')
 
+recommendations=recommendation_rows(st.session_state.get('rent_result'),st.session_state.get('conversation_conditions') or conditions or {},score_context)
+
 map_column,chat_column=st.columns([2,1],gap='large')
 with map_column:
     st.subheader('동네 지도')
@@ -418,11 +421,11 @@ with map_column:
         card=map_card(map_neighborhood,st.session_state.get('rent_result'),st.session_state.get('conversation_conditions') or conditions,
             bike_result,st.session_state.get('resident_data',{}),map_month,park_data)
         regions=region_cards(district_regions(map_neighborhood,map_month),map_neighborhood,st.session_state.get('rent_result'),
-            st.session_state.get('conversation_conditions') or conditions,bike_result,park_data,st.session_state.get('resident_data',{}),map_month)
+            st.session_state.get('conversation_conditions') or conditions,bike_result,park_data,st.session_state.get('resident_data',{}),map_month,st.session_state.get('neighborhood_locations',{}))
         viewport_value=render_viewport(build_map_html(kakao_javascript_key,workplace_location,radius_km,map_stations,city_facilities+lifestyle_facilities,
-            map_neighborhood,card,boundaries.get((map_neighborhood or {}).get('legal_code')),regions),
-            regions=regions,explore=card,navigation=str((map_neighborhood or {}).get('legal_code'))+':'+str(workplace_location),
-            month=map_month,stations=map_stations,defer_population=True)
+            map_neighborhood,card,boundaries.get((map_neighborhood or {}).get('legal_code')),regions,recommendations),
+            regions=regions,explore=card,navigation=str((map_neighborhood or {}).get('legal_code'))+':'+str(workplace_location)+':'+map_asset_revision(),
+            month=map_month,stations=map_stations,defer_population=True,recommendations=recommendations,busy=bool(st.session_state.get('pending_housing_prompt') or st.session_state.get('housing_message')))
 with chat_column:
     render_chat(score_context,commute_context,map_neighborhood)
 

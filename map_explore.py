@@ -78,11 +78,14 @@ def map_card(neighborhood,result,conditions,bikes,residents,month,parks=None):
     return {'lines':text,'sources':sources,'age_rates':rates,'month':month,'composition':age_composition(rates)}
 
 
-def region_cards(regions,selected,result,conditions,bikes,parks,residents,month):
+def region_cards(regions,selected,result,conditions,bikes,parks,residents,month,points=None):
     cards=[]
+    verified={point.get('legal_code'):point for point in (points or {}).values() if point.get('legal_code')}
     for region in regions:
         if (selected or {}).get('legal_code')==region['code']:
             point=selected
+        elif region['code'] in verified:
+            point={**verified[region['code']],'dong':region['name'].split()[-1]}
         else:
             point={**region,'legal_code':region['code'],'dong':region['name'].split()[-1],
                    'point_basis':'동 경계 기준점(대략)'}

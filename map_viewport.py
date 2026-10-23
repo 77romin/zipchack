@@ -18,7 +18,7 @@ def _viewport_component(**args):
     key=args.pop('key')
     # 등록은 현재 실행 컨텍스트에서 수행한다(독립 AppTest 런타임도 지원).
     renderer=components.component('zipchack_viewport',js=_BRIDGE)
-    result=renderer(data=args,key=key,default={'viewport':None},height=575,on_viewport_change=lambda:None)
+    result=renderer(data=args,key=key,default={'viewport':None},height=680,on_viewport_change=lambda:None)
     return result.viewport
 
 def validate_viewport(value):
@@ -39,8 +39,8 @@ def visible_codes(bounds,geometries):
                 codes.append(code);break
     return codes
 
-def render_viewport(html,regions,explore,navigation,month,controls=None,stations=None,defer_population=False):
-    value=_viewport_component(html=html,regions=regions,explore=explore,navigation=navigation,status=st.session_state.get('viewport_status'),stations=stations,key='housing_viewport',default=None)
+def render_viewport(html,regions,explore,navigation,month,controls=None,stations=None,defer_population=False,recommendations=None,busy=False):
+    value=_viewport_component(html=html,regions=regions,explore=explore,navigation=navigation,status=st.session_state.get('viewport_status'),stations=stations,recommendations=recommendations,busy=busy,key='housing_viewport',default=None)
     if not defer_population:
         with controls if controls is not None else nullcontext():
             update_population(value,regions,month)
