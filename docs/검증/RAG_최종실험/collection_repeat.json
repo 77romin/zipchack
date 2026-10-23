@@ -1,0 +1,134 @@
+[
+  {
+    "prompt_version": "prepare-v1",
+    "model": "gpt-5.4-nano",
+    "item_id": "1144010200",
+    "queries": [
+      "공덕역 환승 노선",
+      "공덕역 교통 정보 마포구",
+      "서울 지하철 5호선 6호선 공덕역 환승"
+    ],
+    "own_document": "wikipedia:803942",
+    "own_cache_hit": true,
+    "own_index": {
+      "chunks": 1,
+      "embedded": 1,
+      "removed": 0
+    },
+    "candidate_count": 3,
+    "candidates": [
+      {
+        "id": "5857",
+        "title": "마포구",
+        "summary": "<span class=\"searchmatch\">서울</span> <span class=\"searchmatch\">지하철</span> 2<span class=\"searchmatch\">호</span><span class=\"searchmatch\">선</span>이 <span class=\"searchmatch\">마포구</span>의 합정 (영등포구의 당산역과 연결), 홍대입구 (수도권 전철 경의·중앙<span class=\"searchmatch\">선</span>, 인천국제공항철도와 <span class=\"searchmatch\">환승</span>), 신촌(지하), 이대, 아현역 (서대문구의 충정로역과 연결)을 지나간다. 수도권 전철 <span class=\"searchmatch\">5</span><span class=\"searchmatch\">호</span><span class=\"searchmatch\">선</span>은 <span class=\"searchmatch\">마포구</span>의 마포역, <span class=\"searchmatch\">공덕역</span> (<span class=\"searchmatch\">서울</span> <span class=\"searchmatch\">지하철</span> <span class=\"searchmatch\">6</span>호선"
+      },
+      {
+        "id": "15105",
+        "title": "공덕역",
+        "summary": "<span class=\"searchmatch\">공덕역</span>(孔德驛, Gongdeok station)은 <span class=\"searchmatch\">서울특별시</span> <span class=\"searchmatch\">마포구</span> <span class=\"searchmatch\">공덕동</span>과 도화동에 위치한 수도권 전철 <span class=\"searchmatch\">5</span><span class=\"searchmatch\">호</span><span class=\"searchmatch\">선</span>과 <span class=\"searchmatch\">서울</span> <span class=\"searchmatch\">지하철</span> <span class=\"searchmatch\">6</span><span class=\"searchmatch\">호선</span>, 인천국제공항철도, 그리고 수도권 전철 경의·중앙<span class=\"searchmatch\">선</span>의 <span class=\"searchmatch\">환승</span>역이다. <span class=\"searchmatch\">서울</span> <span class=\"searchmatch\">지하철</span> <span class=\"searchmatch\">6</span><span class=\"searchmatch\">호</span><span class=\"searchmatch\">선</span>은 심야에 2편성이 주박한다. 수도권 전철 <span class=\"searchmatch\">5</span><span class=\"searchmatch\">호</span><span class=\"searchmatch\">선</span>은"
+      },
+      {
+        "id": "83169",
+        "title": "신공덕역",
+        "summary": "신공덕역(新孔德驛)은 <span class=\"searchmatch\">서울특별시</span> 노원구 공릉동에 위치한 경춘<span class=\"searchmatch\">선</span>의 철도역이었다. <span class=\"searchmatch\">마포구</span>에 위치한 신공덕동과 <span class=\"searchmatch\">공덕동</span>과는 관련이 없으며, 원래의 역 이름은 묵동역(墨洞驛)이었다. 1941년 봄에 경성제국대학 이공학부 캠퍼스가 현재의 <span class=\"searchmatch\">서울</span>과학기술대학교 부지에 설립되면서 교수와"
+      }
+    ],
+    "selected": [
+      {
+        "id": "15105",
+        "reason": "공덕역 자체의 교통(5호선·6호선)과 인천국제공항철도, 수도권 전철 경의·중앙선 환승 정보가 요약에 포함되어 공덕역 환승 노선 설명에 직접 부합함"
+      },
+      {
+        "id": "5857",
+        "reason": "공덕역이 속한 마포구 내 철도 노선(5호선·6호선, 경의·중앙선 등)이 개괄적으로 정리되어 공덕역의 환승 맥락을 보조 설명할 수 있음"
+      }
+    ],
+    "accepted": [
+      {
+        "id": "15105",
+        "reason": "공덕역 자체의 교통(5호선·6호선)과 인천국제공항철도, 수도권 전철 경의·중앙선 환승 정보가 요약에 포함되어 공덕역 환승 노선 설명에 직접 부합함",
+        "source_url": "https://ko.wikipedia.org/w/index.php?oldid=42263294"
+      },
+      {
+        "id": "5857",
+        "reason": "공덕역이 속한 마포구 내 철도 노선(5호선·6호선, 경의·중앙선 등)이 개괄적으로 정리되어 공덕역의 환승 맥락을 보조 설명할 수 있음",
+        "source_url": "https://ko.wikipedia.org/w/index.php?oldid=42625439"
+      }
+    ],
+    "excluded": [
+      {
+        "id": "83169",
+        "reason": "P2 미선택"
+      }
+    ],
+    "question_cache_hit": false,
+    "collection_requests": 3,
+    "prepare_ms": 11694.639800000004
+  },
+  {
+    "prompt_version": "prepare-v1",
+    "model": "gpt-5.4-nano",
+    "item_id": "1144010200",
+    "queries": [
+      "공덕역 환승 노선",
+      "공덕역 교통 정보 마포구",
+      "서울 지하철 5호선 6호선 공덕역 환승"
+    ],
+    "own_document": "wikipedia:803942",
+    "own_cache_hit": true,
+    "own_index": {
+      "chunks": 1,
+      "embedded": 1,
+      "removed": 0
+    },
+    "candidate_count": 3,
+    "candidates": [
+      {
+        "id": "5857",
+        "title": "마포구",
+        "summary": "<span class=\"searchmatch\">서울</span> <span class=\"searchmatch\">지하철</span> 2<span class=\"searchmatch\">호</span><span class=\"searchmatch\">선</span>이 <span class=\"searchmatch\">마포구</span>의 합정 (영등포구의 당산역과 연결), 홍대입구 (수도권 전철 경의·중앙<span class=\"searchmatch\">선</span>, 인천국제공항철도와 <span class=\"searchmatch\">환승</span>), 신촌(지하), 이대, 아현역 (서대문구의 충정로역과 연결)을 지나간다. 수도권 전철 <span class=\"searchmatch\">5</span><span class=\"searchmatch\">호</span><span class=\"searchmatch\">선</span>은 <span class=\"searchmatch\">마포구</span>의 마포역, <span class=\"searchmatch\">공덕역</span> (<span class=\"searchmatch\">서울</span> <span class=\"searchmatch\">지하철</span> <span class=\"searchmatch\">6</span>호선"
+      },
+      {
+        "id": "15105",
+        "title": "공덕역",
+        "summary": "<span class=\"searchmatch\">공덕역</span>(孔德驛, Gongdeok station)은 <span class=\"searchmatch\">서울특별시</span> <span class=\"searchmatch\">마포구</span> <span class=\"searchmatch\">공덕동</span>과 도화동에 위치한 수도권 전철 <span class=\"searchmatch\">5</span><span class=\"searchmatch\">호</span><span class=\"searchmatch\">선</span>과 <span class=\"searchmatch\">서울</span> <span class=\"searchmatch\">지하철</span> <span class=\"searchmatch\">6</span><span class=\"searchmatch\">호선</span>, 인천국제공항철도, 그리고 수도권 전철 경의·중앙<span class=\"searchmatch\">선</span>의 <span class=\"searchmatch\">환승</span>역이다. <span class=\"searchmatch\">서울</span> <span class=\"searchmatch\">지하철</span> <span class=\"searchmatch\">6</span><span class=\"searchmatch\">호</span><span class=\"searchmatch\">선</span>은 심야에 2편성이 주박한다. 수도권 전철 <span class=\"searchmatch\">5</span><span class=\"searchmatch\">호</span><span class=\"searchmatch\">선</span>은"
+      },
+      {
+        "id": "83169",
+        "title": "신공덕역",
+        "summary": "신공덕역(新孔德驛)은 <span class=\"searchmatch\">서울특별시</span> 노원구 공릉동에 위치한 경춘<span class=\"searchmatch\">선</span>의 철도역이었다. <span class=\"searchmatch\">마포구</span>에 위치한 신공덕동과 <span class=\"searchmatch\">공덕동</span>과는 관련이 없으며, 원래의 역 이름은 묵동역(墨洞驛)이었다. 1941년 봄에 경성제국대학 이공학부 캠퍼스가 현재의 <span class=\"searchmatch\">서울</span>과학기술대학교 부지에 설립되면서 교수와"
+      }
+    ],
+    "selected": [
+      {
+        "id": "15105",
+        "reason": "공덕역 자체의 교통(5호선·6호선)과 인천국제공항철도, 수도권 전철 경의·중앙선 환승 정보가 요약에 포함되어 공덕역 환승 노선 설명에 직접 부합함"
+      },
+      {
+        "id": "5857",
+        "reason": "공덕역이 속한 마포구 내 철도 노선(5호선·6호선, 경의·중앙선 등)이 개괄적으로 정리되어 공덕역의 환승 맥락을 보조 설명할 수 있음"
+      }
+    ],
+    "accepted": [
+      {
+        "id": "15105",
+        "reason": "공덕역 자체의 교통(5호선·6호선)과 인천국제공항철도, 수도권 전철 경의·중앙선 환승 정보가 요약에 포함되어 공덕역 환승 노선 설명에 직접 부합함",
+        "source_url": "https://ko.wikipedia.org/w/index.php?oldid=42263294"
+      },
+      {
+        "id": "5857",
+        "reason": "공덕역이 속한 마포구 내 철도 노선(5호선·6호선, 경의·중앙선 등)이 개괄적으로 정리되어 공덕역의 환승 맥락을 보조 설명할 수 있음",
+        "source_url": "https://ko.wikipedia.org/w/index.php?oldid=42625439"
+      }
+    ],
+    "excluded": [
+      {
+        "id": "83169",
+        "reason": "P2 미선택"
+      }
+    ],
+    "question_cache_hit": true,
+    "collection_requests": 0,
+    "prepare_ms": 7.5301999459043145
+  }
+]

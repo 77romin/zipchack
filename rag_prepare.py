@@ -5,6 +5,7 @@ import json,time
 from pathlib import Path
 from urllib.parse import quote
 import requests
+from wiki_transport import get as wiki_get
 from rag_index import Source
 from wiki_documents import API,TITLES,collect,LICENSE
 
@@ -64,7 +65,7 @@ class WikiSearch:
         for attempt in range(3):
             try:
                 self.requests+=1
-                response=requests.get(API,params={**params,'action':'query','format':'json','maxlag':5},headers=self.headers,timeout=(5,25))
+                response=wiki_get(API,params={**params,'action':'query','format':'json','maxlag':5},headers=self.headers,timeout=(5,25))
                 response.raise_for_status();data=response.json()
                 if data.get('error'):raise ValueError()
                 path.write_text(json.dumps(data,ensure_ascii=False),encoding='utf-8')
@@ -72,7 +73,6 @@ class WikiSearch:
             except (requests.RequestException,ValueError):
                 if attempt==2:raise ValueError('위키백과 자료 검색·수집에 실패했습니다.') from None
                 time.sleep(attempt+1)
-            finally:time.sleep(self.interval)
 
     def search(self,query):
         data=self.query({'list':'search','srsearch':query,'srnamespace':0,'srlimit':5,'srprop':'snippet'})
@@ -106,8 +106,9 @@ def prepare(item,question,key,folder,index,contact='',model='gpt-5.4-nano'):
     plan=folder/'plans'/(identity+'.json')
     if plan.exists():
         cached=json.loads(plan.read_text(encoding='utf-8'))
-        index.put_many([Source(**source) for source in cached['sources']])
-        return {**cached['report'],'question_cache_hit':True,'collection_requests':0,'prepare_ms':(time.perf_counter()-started)*1000}
+        restored=index.put_many([Source(**source) for source in cached['sources']])
+        return {**cached['report'],'own_index':restored[0],'restored_index':restored,
+                'question_cache_hit':True,'collection_requests':0,'prepare_ms':(time.perf_counter()-started)*1000}
     own,hit=collect(item,TITLES[item['code']],folder/'own',contact)
     # 자체 문서는 P1/P2·길이·제외 결과보다 우선한다.
     own_result=index.put(own)

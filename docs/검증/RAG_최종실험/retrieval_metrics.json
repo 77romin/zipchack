@@ -1,0 +1,56 @@
+[
+  {
+    "mode": "similarity",
+    "positive_cases": [
+      {
+        "case": "Q1",
+        "matched": 1,
+        "retrieved": 1,
+        "hit": true
+      },
+      {
+        "case": "Q2",
+        "matched": 1,
+        "retrieved": 1,
+        "hit": true
+      },
+      {
+        "case": "Q3",
+        "matched": 1,
+        "retrieved": 1,
+        "hit": true
+      }
+    ],
+    "hit_rate": 1.0,
+    "strict_support_fraction": 1.0,
+    "mean_retrieve_ms": 1557.0952199865133,
+    "mean_generate_ms": 2256.485980004072
+  },
+  {
+    "mode": "mmr",
+    "positive_cases": [
+      {
+        "case": "Q1",
+        "matched": 1,
+        "retrieved": 1,
+        "hit": true
+      },
+      {
+        "case": "Q2",
+        "matched": 1,
+        "retrieved": 1,
+        "hit": true
+      },
+      {
+        "case": "Q3",
+        "matched": 1,
+        "retrieved": 1,
+        "hit": true
+      }
+    ],
+    "hit_rate": 1.0,
+    "strict_support_fraction": 1.0,
+    "mean_retrieve_ms": 421.7624200042337,
+    "mean_generate_ms": 2286.833219998516
+  }
+]

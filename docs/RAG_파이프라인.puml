@@ -1,0 +1,24 @@
+@startuml
+title 집.착 RAG 활동도
+start
+:질문, 동네 코드, 모드, Top-k;
+:공식 메타데이터와 시설·인구 문서 준비;
+if (자체 위키 문서 연결 검증됨?) then (예)
+  if (질문 계획 캐시 존재?) then (예)
+    :선별된 문서 복구 · HTTP 0회;
+  else (아니오)
+    :P1 검색어 추출;
+    :외부 검색 · P2 후보 선별;
+    :선택/제외 기록 · 원문 수집 · 캐시;
+  endif
+else (아니오)
+  :미지원 안내 · 준비된 공식 근거만 사용;
+endif
+:청킹 · 임베딩 · 메타데이터/외부 컬렉션 적재;
+partition LangGraph {
+  :retrieve\n항목 메타데이터 + similarity/MMR Top-k;
+  :generate\nP3 답변 · 인용 검증;
+}
+:근거/출처 종류/기준일/이용 조건 표시;
+stop
+@enduml

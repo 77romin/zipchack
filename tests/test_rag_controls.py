@@ -22,7 +22,7 @@ class RagControlsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder,patch('rag_prepare.collect',return_value=(own,True)) as collect,patch('rag_prepare.ask',return_value={'queries':['공덕']} ) as ask,patch('rag_prepare.WikiSearch') as wiki:
             wiki.return_value.search.return_value=[];wiki.return_value.requests=0
             first=prepare(item,'질문','key',folder,Mock(put=Mock(return_value={'chunks':1,'embedded':0,'removed':0})))
-            other=Mock();second=prepare(item,'질문','key',folder,other)
+            other=Mock(put_many=Mock(return_value=[{'chunks':1,'embedded':0,'removed':0}]));second=prepare(item,'질문','key',folder,other)
             self.assertFalse(first['question_cache_hit']);self.assertTrue(second['question_cache_hit'])
             self.assertEqual(second['collection_requests'],0)
             self.assertEqual(ask.call_count,1);self.assertEqual(collect.call_count,1)
@@ -34,6 +34,12 @@ class RagControlsTests(unittest.TestCase):
         self.assertIn('색인이 없습니다',safe_error(ValueError('색인이 없습니다')))
         self.assertNotIn('secret',safe_error(ValueError('secret')))
         self.assertEqual(source_kind({'kind':'external','source_url':'https://ko.wikipedia.org/w/'}),'위키백과')
+
+    def test_wiki_without_contact_never_sends_http(self):
+        from wiki_transport import get
+        with patch('wiki_transport.requests.get') as http:
+            with self.assertRaises(ValueError):get('https://ko.wikipedia.org/w/api.php',headers={'User-Agent':'Zipchack/0.1 (local educational RAG project)'})
+            http.assert_not_called()
 
     def test_abstention_is_readable_and_alternate_citation_is_validated(self):
         from rag_pipeline import validate_answer

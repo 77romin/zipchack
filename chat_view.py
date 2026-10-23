@@ -10,11 +10,13 @@ from rag_candidate import target_candidate
 
 from concurrent.futures import ThreadPoolExecutor,TimeoutError
 from copy import deepcopy
+from time import perf_counter
 
 _JOBS=ThreadPoolExecutor(max_workers=4)
 
 
 def process_request(prompt,current,history,score_context,commute_context,result,cache,asked,use_rag,mode,item_id,key,keys,model,failures,runner,rag_call,candidate_call=None,k=4):
+    started=perf_counter()
     prepared={}
     def prepare(result,conditions,context):
         prepared.update(prepare_candidates(result,conditions,context,failures))
@@ -31,11 +33,13 @@ def process_request(prompt,current,history,score_context,commute_context,result,
                 assistant['rag_result']=candidate_call(target,context,prompt,mode) if k==4 else candidate_call(target,context,prompt,mode,k=k)
             except Exception as error:
                 assistant['rag_error']=safe_error(error)
+            assistant['elapsed_seconds']=perf_counter()-started
             return turn,assistant,prepared,failures
         if not item_id:assistant['rag_error']='검색할 동네가 아직 없습니다. 지도 위치를 확인해주세요.'
         else:
             try:assistant['rag_result']=rag_call(item_id,prompt,mode) if k==4 else rag_call(item_id,prompt,mode,k=k)
             except Exception as error:assistant['rag_error']=safe_error(error)
+    assistant['elapsed_seconds']=perf_counter()-started
     return turn,assistant,prepared,failures
 
 
@@ -91,6 +95,7 @@ def render_chat(score_context=None,commute_context=None,neighborhood=None):
                 st.write(item['content'])
                 if item.get('rag_result'):show_answer(item['rag_result'])
                 if item.get('rag_error'):st.caption(item['rag_error'])
+                if 'elapsed_seconds' in item:st.caption(f"조건 처리·문서 준비·검색·생성 {item['elapsed_seconds']:.2f}초 · 화면 그리기 시간 제외")
         if active_job:
             with st.chat_message('user'):st.write(active_job['prompt'])
     if current:

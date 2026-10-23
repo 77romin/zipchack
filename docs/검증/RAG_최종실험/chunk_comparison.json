@@ -1,0 +1,35 @@
+{
+  "item": "1114016200",
+  "settings": [
+    {
+      "size": 1000,
+      "overlap": 200,
+      "result": {
+        "chunks": 2,
+        "embedded": 2,
+        "removed": 0
+      },
+      "count": 2
+    },
+    {
+      "size": 300,
+      "overlap": 60,
+      "result": {
+        "chunks": 5,
+        "embedded": 5,
+        "removed": 0
+      },
+      "count": 5
+    },
+    {
+      "size": 300,
+      "overlap": 60,
+      "result": {
+        "chunks": 5,
+        "embedded": 0,
+        "removed": 0
+      },
+      "count": 5
+    }
+  ]
+}

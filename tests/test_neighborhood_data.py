@@ -35,8 +35,8 @@ class NeighborhoodDataTests(unittest.TestCase):
         item={'code':'1111010100','district':'종로구','name':'청운동'}
         response=Mock();response.json.return_value=self.payload()
         with tempfile.TemporaryDirectory() as folder,patch('wiki_documents.requests.get',return_value=response) as get:
-            first,hit=collect(item,'청운동',folder)
-            second,cached=collect(item,'청운동',folder)
+            first,hit=collect(item,'청운동',folder,contact='test@example.org')
+            second,cached=collect(item,'청운동',folder,contact='test@example.org')
             self.assertFalse(hit);self.assertTrue(cached)
             self.assertEqual(asdict(first),asdict(second));self.assertEqual(get.call_count,1)
 
@@ -55,8 +55,8 @@ class NeighborhoodDataTests(unittest.TestCase):
         item={'code':'1111010100','district':'종로구','name':'청운동'}
         response=Mock();response.json.return_value=self.payload()
         with tempfile.TemporaryDirectory() as folder,patch('wiki_documents.requests.get',return_value=response):
-            first,_=collect(item,'청운동',folder)
+            first,_=collect(item,'청운동',folder,contact='test@example.org')
             response.json.return_value=self.payload('다른 지역의 동네입니다.')
-            with self.assertRaises(ValueError):collect(item,'청운동',folder,refresh=True)
-            cached,hit=collect(item,'청운동',folder)
+            with self.assertRaises(ValueError):collect(item,'청운동',folder,contact='test@example.org',refresh=True)
+            cached,hit=collect(item,'청운동',folder,contact='test@example.org')
             self.assertTrue(hit);self.assertEqual(asdict(first),asdict(cached))
