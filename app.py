@@ -398,6 +398,7 @@ with map_column:
     with map_slot:
         st.subheader("추천 지도")
         st.caption('법정동 경계: 국가공간정보포털 2023-07-29 공개 자료의 KnellBalm 변환본 · 현재 경계와 차이가 있을 수 있습니다. 회색은 인구 구성 미확인입니다.')
+        st.caption('연령 지도 색상은 동별 통계를 부드럽게 혼합한 시각화입니다. 경계 부근의 색은 해당 위치의 실측 연령 비율이 아니며, 클릭하면 동별 원래 수치를 확인할 수 있습니다.')
         map_neighborhood,map_month=map_region(neighborhood)
         map_stations=[]
         if bike_result and map_neighborhood:

@@ -1,6 +1,7 @@
 """카카오 지도 HTML 생성. 서버 REST 키는 전달하지 않는다."""
 import json
 import math
+from pathlib import Path
 from urllib.parse import quote
 
 
@@ -22,7 +23,8 @@ def build_map_html(javascript_key, workplace=None, radius_km=3.0, stations=None,
                           "age_regions":age_regions or [],"explore":explore,"geometry":geometry,"neighborhood": neighborhood, "stations": stations or [], "facilities": facilities or [], "radius_m": round(radius_km * 1000)}, ensure_ascii=False)
     # HTML의 script 종료 태그를 데이터로 삽입할 수 없게 한다.
     payload = payload.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
-    return TEMPLATE.replace("__KEY__", quote(javascript_key, safe="")).replace("__DATA__", payload)
+    gradient=(Path(__file__).resolve().parent/'map_gradient.js').read_text(encoding='utf-8')
+    return TEMPLATE.replace('__GRADIENT_CODE__',gradient).replace("__KEY__", quote(javascript_key, safe="")).replace("__DATA__", payload)
 
 
 TEMPLATE = r'''
@@ -38,6 +40,7 @@ TEMPLATE = r'''
 <div id="error" role="alert"></div><div id="map" aria-label="직장과 탐색 범위 지도"></div>
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=__KEY__&autoload=false"></script>
 <script>
+__GRADIENT_CODE__
 const data = __DATA__;
 function fail(){document.getElementById('error').textContent='지도 연결을 확인해주세요. 카카오맵 활성화, JavaScript 키, SDK 등록 도메인을 확인하세요.';}
 if(window.kakao && window.kakao.maps){
@@ -45,23 +48,25 @@ if(window.kakao && window.kakao.maps){
     const center = new kakao.maps.LatLng(data.center.latitude, data.center.longitude);
     const map = new kakao.maps.Map(document.getElementById('map'), {center:center, level:7});
     map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
-    const stationInfo = new kakao.maps.InfoWindow({removable:true});
+    const stationInfo = new kakao.maps.InfoWindow({removable:true,zIndex:20});
+    const smoothAge=createAgeGradient(map,data);
     const bikeLayers=[],facilityLayers=[],areaLayers=[];
     const comparisonLayers=[];
     document.getElementById('layer-bike').onchange=function(){bikeLayers.forEach(x=>x.setMap(this.checked?map:null));};
     document.getElementById('layer-facility').onchange=function(){facilityLayers.forEach(x=>x.setMap(this.checked?map:null));};
     document.getElementById('layer-age').onchange=function(){
       comparisonLayers.forEach(x=>x.setMap(this.value==='composition'?map:null));
+      smoothAge.setEnabled(this.value==='composition');
       if(this.value==='composition'){
         const composition=(data.explore||{}).composition;
-        areaLayers.forEach(x=>x.setOptions({fillColor:composition?composition.color:'#94a3b8',fillOpacity:0.48}));
+        areaLayers.forEach(x=>x.setOptions({fillOpacity:0,strokeOpacity:0}));
         document.getElementById('age-note').textContent=composition?'20~39세 '+composition.young_share+'% / 60세 이상 '+composition.older_share+'% · 주민등록 '+data.explore.month:'연령 구성 자료 없음 (회색)';
         return;
       }
       const rates=(data.explore||{}).age_rates||{};const value=rates[this.value];
       const known=this.value && value!==undefined;
       const color=this.value?(known?'#7c3aed':'#94a3b8'):'#f97316';
-      areaLayers.forEach(x=>x.setOptions({fillColor:color,fillOpacity:known?0.15+Math.min(value,100)/100*0.6:0.15}));
+      areaLayers.forEach(x=>x.setOptions({strokeOpacity:0,fillColor:color,fillOpacity:known?0.15+Math.min(value,100)/100*0.6:0.15}));
       document.getElementById('age-note').textContent=this.value?(known?this.value+'대 '+value+'% · 주민등록 기준월 '+data.explore.month:'해당 연령 자료 미조회 (회색)'):'선택 동네의 조회된 주민등록 자료만 표시';
     };
     (data.stations || []).forEach(function(station){
@@ -150,7 +155,7 @@ if(window.kakao && window.kakao.maps){
       if(!region.geometry)return;
       const polygons=region.geometry.type==='MultiPolygon'?region.geometry.coordinates:[region.geometry.coordinates];
       polygons.forEach(rings=>{
-      const polygon=new kakao.maps.Polygon({map:map,path:rings.map(ring=>ring.map(p=>new kakao.maps.LatLng(p[1],p[0]))),strokeColor:'#64748b',strokeOpacity:0.6,strokeWeight:1,fillColor:c?c.color:'#94a3b8',fillOpacity:0.48});
+      const polygon=new kakao.maps.Polygon({map:map,path:rings.map(ring=>ring.map(p=>new kakao.maps.LatLng(p[1],p[0]))),strokeOpacity:0,strokeWeight:0,fillOpacity:0});
       comparisonLayers.push(polygon);
       kakao.maps.event.addListener(polygon,'click',()=>{
         const box=document.createElement('div');box.style.cssText='padding:12px;max-width:280px;white-space:normal';
