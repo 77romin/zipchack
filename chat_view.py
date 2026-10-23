@@ -4,8 +4,9 @@ import streamlit as st
 from chat_conditions import ConversationError, map_conditions, DEFAULT_MODEL
 from chat_query import run_chat_turn
 from rent_api import service_keys
-from rag_view import answer_question,show_answer
-from recommendations import prepare_candidates
+from rag_view import answer_question,answer_candidate,show_answer
+from recommendations import prepare_candidates,recommendation_rows
+from rag_candidate import target_candidate
 
 from concurrent.futures import ThreadPoolExecutor,TimeoutError
 from copy import deepcopy
@@ -13,7 +14,7 @@ from copy import deepcopy
 _JOBS=ThreadPoolExecutor(max_workers=4)
 
 
-def process_request(prompt,current,history,score_context,commute_context,result,cache,asked,use_rag,mode,item_id,key,keys,model,failures,runner,rag_call):
+def process_request(prompt,current,history,score_context,commute_context,result,cache,asked,use_rag,mode,item_id,key,keys,model,failures,runner,rag_call,candidate_call=None):
     prepared={}
     def prepare(result,conditions,context):
         prepared.update(prepare_candidates(result,conditions,context,failures))
@@ -22,6 +23,15 @@ def process_request(prompt,current,history,score_context,commute_context,result,
                 cache=cache,commute_context=commute_context,prepare_context=prepare)
     assistant={'role':'assistant','content':turn['answer']}
     if use_rag:
+        context=prepared or score_context or {}
+        rows=recommendation_rows(turn['result'],turn['conditions'],context)
+        target=target_candidate(rows,None)
+        if target and candidate_call:
+            try:
+                assistant['rag_result']=candidate_call(target,context,prompt,mode)
+            except Exception:
+                assistant['rag_error']='추천 조건은 반영했지만 후보 근거 준비·검색에 실패했어요. 연결 상태를 확인해주세요.'
+            return turn,assistant,prepared,failures
         if not item_id:assistant['rag_error']='검색할 동네가 아직 없습니다. 지도 위치를 확인해주세요.'
         else:
             try:assistant['rag_result']=rag_call(item_id,prompt,mode)
@@ -67,7 +77,7 @@ def render_chat(score_context=None,commute_context=None,neighborhood=None):
     mode=st.radio('검색 방식',['similarity','mmr'],format_func=lambda value:'유사도' if value=='similarity' else 'MMR',
                   horizontal=True,key='chat_retrieval_mode',disabled=not use_rag)
     if use_rag:
-        st.caption('근거 검색 동네: '+(neighborhood or {}).get('name','미선택')+' · 저장된 문서 기준')
+        st.caption('추천 후보가 있으면 확인된 최상위 후보의 근거를 자동 준비합니다. 후보가 없으면 지도 선택 동네의 저장 문서를 검색합니다.')
     history = st.session_state.setdefault('housing_chat', [])
     current = st.session_state.setdefault('conversation_conditions', {})
     active_job=st.session_state.get('housing_job')
@@ -99,7 +109,7 @@ def render_chat(score_context=None,commute_context=None,neighborhood=None):
             deepcopy(st.session_state.get('rent_result')),deepcopy(st.session_state.get('rent_query_cache')),
             st.session_state.get('chat_optional_asked',False),use_rag,mode,(neighborhood or {}).get('legal_code'),
             os.getenv('GMS_KEY',''),service_keys(os.environ),os.getenv('GMS_MODEL','').strip() or DEFAULT_MODEL,
-            dict(st.session_state.get('recommendation_failures',{})),run_chat_turn,answer_question)
+            dict(st.session_state.get('recommendation_failures',{})),run_chat_turn,answer_question,answer_candidate)
         job={'future':future,'prompt':prompt,'history':list(history)}
         st.session_state.housing_job=job;st.session_state.pending_housing_prompt=prompt
         # 즉시 완료되는 작업은 같은 실행에서 반영하고, 긴 API 작업은 화면과 분리한다.

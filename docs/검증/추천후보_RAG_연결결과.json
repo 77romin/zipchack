@@ -1,0 +1,93 @@
+[
+  {
+    "answer": "- 신당동의 대표점(37.565, 127.014) 기준으로 500m 직선거리 내 주요 공원은 0곳으로 확인됩니다. [2]\n- 신당동의 대표점(37.565, 127.014) 기준으로 500m 직선거리 내 따릉이 대여소는 5곳이 확인됩니다: 충무아트센터(직선 116m), NH농협은행(신당역 6번출구)(직선 210m), 신당역 12번 출구 뒤(직선 232m), DDP 패션몰(직선 352m), 광희문(직선 362m). [3]\n- 실시간 자전거 재고는 알 수 있나? 제공된 근거에는 ‘따릉이는 실시간 재고가 아니다’라고 되어 있어, 실시간 재고 여부는 확인할 수 없습니다. [3]",
+    "abstained": false,
+    "mode": "similarity",
+    "preparation": {
+      "item_id": "1114016200",
+      "documents": 4,
+      "embedded": 5,
+      "snapshot": "05c72235135203c84bf0bc5fc38f007ac8638f2b3619c593dbfa9b63df27252d"
+    },
+    "citations": [
+      {
+        "numbers": [
+          2
+        ],
+        "title": "주요 공원 위치 근거 · 신당동",
+        "source_url": "https://data.seoul.go.kr/dataList/OA-394/S/1/datasetView.do",
+        "kind": "external",
+        "observed_at": "2026-09-23"
+      },
+      {
+        "numbers": [
+          3
+        ],
+        "title": "따릉이 대여소 위치 근거 · 신당동",
+        "source_url": "https://data.seoul.go.kr/dataList/OA-13252/F/1/datasetView.do",
+        "kind": "external",
+        "observed_at": "2026-06"
+      }
+    ],
+    "trace": [
+      "retrieve",
+      "generate"
+    ],
+    "timings": {
+      "retrieve_ms": 415.8365000039339,
+      "generate_ms": 2312.5010000076145,
+      "nodes_total_ms": 2728.3375000115484,
+      "end_to_end_ms": 2731.2117000110447
+    }
+  },
+  {
+    "answer": "- 기준 동네: 서울특별시 중구 신당동(법정동 코드 1114016200, 대표점 37.565, 127.014) [1]\n- 대표점 주변 공원: 대표점(37.565, 127.014) 기준 500m 직선거리 내 주요 공원은 0곳으로 제시되어 있습니다. 다만 이는 ‘전체 공원 전수자료’가 아닐 수 있고, 도보거리/통근시간을 의미하지 않습니다. [2]\n- 대표점 주변 따릉이(자전거 대여소) 위치: 500m 직선거리 내 대여소가 5곳으로 제시되어 있습니다.\n  - 충무아트센터(직선 116m) [4]\n  - NH농협은행(신당역 6번출구)(직선 210m) [4]\n  - 신당역 12번 출구 뒤(직선 232m) [4]\n  - DDP 패션몰(직선 352m) [4]\n  - 광희문(직선 362m) [4]\n- 실시간 자전거 재고 여부: 제공된 근거에는 따릉이 ‘실시간 재고(현재 이용 가능 자전거 수/대수)’ 정보가 없습니다. 따라서 실시간 재고를 알 수 있는지는 근거만으로 확인할 수 없습니다. [2][4]",
+    "abstained": false,
+    "mode": "mmr",
+    "preparation": {
+      "item_id": "1114016200",
+      "documents": 4,
+      "embedded": 0,
+      "snapshot": "05c72235135203c84bf0bc5fc38f007ac8638f2b3619c593dbfa9b63df27252d"
+    },
+    "citations": [
+      {
+        "numbers": [
+          1
+        ],
+        "title": "서울특별시 중구 신당동",
+        "source_url": "https://www.code.go.kr/stdcode/regCodeL.do",
+        "kind": "metadata",
+        "observed_at": "2026-10-22T14:47:59.206986+09:00"
+      },
+      {
+        "numbers": [
+          2
+        ],
+        "title": "주요 공원 위치 근거 · 신당동",
+        "source_url": "https://data.seoul.go.kr/dataList/OA-394/S/1/datasetView.do",
+        "kind": "external",
+        "observed_at": "2026-09-23"
+      },
+      {
+        "numbers": [
+          4
+        ],
+        "title": "따릉이 대여소 위치 근거 · 신당동",
+        "source_url": "https://data.seoul.go.kr/dataList/OA-13252/F/1/datasetView.do",
+        "kind": "external",
+        "observed_at": "2026-06"
+      }
+    ],
+    "trace": [
+      "retrieve",
+      "generate"
+    ],
+    "timings": {
+      "retrieve_ms": 436.4421000937,
+      "generate_ms": 3138.5366999311373,
+      "nodes_total_ms": 3574.9788000248373,
+      "end_to_end_ms": 3576.2630999088287
+    }
+  }
+]

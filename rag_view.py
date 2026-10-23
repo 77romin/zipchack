@@ -8,6 +8,30 @@ from rag_pipeline import build_graph,run
 
 ROOT=Path(__file__).resolve().parent
 
+
+def answer_candidate(point,context,question,mode):
+    """자료 묶음별 색인으로 다른 사용자·대표점의 근거 혼입을 방지한다."""
+    from hashlib import sha256
+    from dataclasses import asdict
+    import json
+    from rag_candidate import candidate_sources
+    from neighborhood_data import neighborhood_sources,wiki_sources
+    code=point['legal_code']
+    sources=[s for s in neighborhood_sources() if s.item_id==code]
+    if not sources:raise ValueError('공식 법정동 코드가 확인되지 않았습니다.')
+    sources.extend(s for s in wiki_sources() if s.item_id==code)
+    sources.extend(candidate_sources(point,context))
+    identity=sha256(json.dumps([asdict(s) for s in sources],sort_keys=True,ensure_ascii=False).encode()).hexdigest()
+    key=os.getenv('GMS_KEY','').strip()
+    model=os.getenv('RAG_EMBEDDING_MODEL','').strip() or 'text-embedding-3-small'
+    index=Index(ROOT/'storage/rag_candidates'/identity,GmsEmbeddings(key,model),model)
+    try:
+        indexed=index.put_many(sources)
+        result=run(build_graph(index,key,os.getenv('GMS_MODEL','').strip() or 'gpt-5.4-nano'),code,question,mode=mode)
+        result['preparation']={'item_id':code,'documents':len(sources),'embedded':sum(r['embedded'] for r in indexed),'snapshot':identity}
+        return result
+    finally:index.close()
+
 def answer_question(item_id,question,mode):
     if not (ROOT/'storage/rag/chroma.sqlite3').exists():
         raise ValueError('근거 색인이 없습니다. 자료 준비와 색인을 먼저 실행해주세요.')
@@ -21,6 +45,9 @@ def answer_question(item_id,question,mode):
     finally:index.close()
 
 def show_answer(result):
+    if result.get('preparation'):
+        p=result['preparation']
+        st.caption(f"추천 근거 대상: {p['item_id']} · 준비 문서 {p['documents']}개 · 새 임베딩 {p['embedded']}개")
     st.markdown(result['answer'])
     if result.get('abstained'):st.info('자료가 부족해 답변을 유보했습니다.')
     citations=result.get('citations',[])
