@@ -9,7 +9,7 @@ const document={getElementById(id){if(!elements.has(id))elements.set(id,el());re
 class Shape{constructor(options){this.options=options;objects.push(this);}setMap(map){this.map=map;}setOptions(options){Object.assign(this.options,options);}getBounds(){return {};}setContent(content){this.content=content;}setPosition(){}open(){}}
 class MapObject{addControl(){}setBounds(){}setCenter(){}setLevel(){}getCenter(){return {};}getProjection(){return {containerPointFromCoords:p=>({x:p.lon,y:p.lat})};}}
 const maps={load:f=>f(),LatLng:class{constructor(lat,lon){this.lat=lat;this.lon=lon;}},Map:MapObject,ZoomControl:class{},ControlPosition:{RIGHT:1},Marker:Shape,Circle:Shape,Polygon:Shape,InfoWindow:Shape,CustomOverlay:Shape,LatLngBounds:class{extend(){}},event:{addListener(object,type,callback){events.push({object,type,callback});}}};
-vm.runInNewContext(source,{window:{kakao:{maps}},kakao:{maps},document,console});
+vm.runInNewContext(source,{window:{kakao:{maps},addEventListener(){}},kakao:{maps},document,console,Map});
 assert(elements.get('age-note').textContent.includes('11'));
 elements.get('layer-bike').checked=false;elements.get('layer-bike').onchange();
 const area=events.find(e=>Array.isArray(e.object.options?.path));assert(area);area.callback();

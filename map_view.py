@@ -158,14 +158,33 @@ if(window.kakao && window.kakao.maps){
       const polygon=new kakao.maps.Polygon({map:map,path:rings.map(ring=>ring.map(p=>new kakao.maps.LatLng(p[1],p[0]))),strokeOpacity:0,strokeWeight:0,fillOpacity:0});
       comparisonLayers.push(polygon);
       kakao.maps.event.addListener(polygon,'click',()=>{
+        const c=region.composition;
         const box=document.createElement('div');box.style.cssText='padding:12px;max-width:280px;white-space:normal';
         box.textContent=region.name+' · 법정동 경계(2023 자료) · '+region.month+' 주민등록 · '+(c?'20~39세 '+c.young_share+'% / 60세 이상 '+c.older_share+'%':'자료 없음');
         stationInfo.setContent(box);stationInfo.setPosition(position);stationInfo.open(map);
       });
       });
     });
-    if(data.age_regions && data.age_regions.length>1)map.setBounds(ageBounds);
     document.getElementById('layer-age').onchange();
+    window.addEventListener('message',event=>{
+      if(event.source!==window.parent || event.data.type!=='zipchack:data')return;
+      const incoming=new Map((event.data.regions||[]).map(r=>[r.code,r]));
+      (data.age_regions||[]).forEach(region=>{if(incoming.has(region.code))Object.assign(region,incoming.get(region.code));});
+      if(event.data.explore)data.explore=event.data.explore;
+      document.getElementById('layer-age').onchange();
+    });
+    let viewportTimer;
+    function publishViewport(){
+      if(!window.parent || typeof map.getBounds!=='function')return;
+      const bounds=map.getBounds(),sw=bounds.getSouthWest(),ne=bounds.getNorthEast();
+      window.parent.postMessage({type:'zipchack:viewport',viewport:{south:sw.getLat(),west:sw.getLng(),north:ne.getLat(),east:ne.getLng()}},'*');
+    }
+    kakao.maps.event.addListener(map,'idle',()=>{
+      window.clearTimeout(viewportTimer);viewportTimer=window.setTimeout(publishViewport,500);
+    });
+    if(window.parent && typeof window.parent.postMessage==='function'){
+      window.parent.postMessage({type:'zipchack:ready'},'*');window.setTimeout(publishViewport,650);
+    }
   });
 }else{fail();}
 </script></body></html>

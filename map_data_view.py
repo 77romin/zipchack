@@ -85,7 +85,7 @@ def district_regions(point,month):
     regions=[]
     for item in rows:
         code=item['code']
-        if code[:5]!=point['legal_code'][:5] or code not in geometries:continue
+        if code not in geometries:continue
         geometry=geometries[code]
         ring=geometry['coordinates'][0] if geometry['type']=='Polygon' else geometry['coordinates'][0][0]
         lon=sum(p[0] for p in ring)/len(ring);lat=sum(p[1] for p in ring)/len(ring)

@@ -11,6 +11,7 @@ from map_explore import map_card,read_boundaries
 from bike_data import load_stations, bundled_stations, SOURCE_URL
 from map_data_view import map_region,district_regions
 from boundary_data import bundled_boundaries
+from map_viewport import render_viewport
 from geo import stations_within
 from seoul_api import fetch_citydata, SeoulDataError
 from city_view import render_citydata
@@ -410,10 +411,11 @@ with map_column:
             radius_km = conditions.get("search_radius_km", 3.0) if conditions else 3.0
             card=map_card(map_neighborhood,st.session_state.get('rent_result'),st.session_state.get('conversation_conditions') or conditions,
                           bike_result,st.session_state.get('resident_data',{}),map_month)
-            st.iframe(
+            render_viewport(
                 build_map_html(kakao_javascript_key, workplace_location, radius_km, map_stations, city_facilities+lifestyle_facilities, map_neighborhood,card,boundaries.get((map_neighborhood or {}).get('legal_code')),
                     district_regions(map_neighborhood,map_month)),
-                height=575,
+                regions=district_regions(map_neighborhood,map_month),explore=card,
+                navigation=str((map_neighborhood or {}).get('legal_code'))+':'+str(workplace_location),month=map_month,
             )
         st.caption("파란 원은 직선거리 탐색 범위이며 실제 통근 가능 영역이 아닙니다.")
         if neighborhood:

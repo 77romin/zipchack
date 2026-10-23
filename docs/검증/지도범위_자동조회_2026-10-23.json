@@ -1,0 +1,19 @@
+{
+  "bounds": {
+    "south": 37.55,
+    "north": 37.57,
+    "west": 127.0,
+    "east": 127.04
+  },
+  "candidate_count": 36,
+  "district_codes": [
+    "11110",
+    "11140",
+    "11200",
+    "11230"
+  ],
+  "success_count": 36,
+  "failure_count": 0,
+  "app_exception_count": 0,
+  "validation_scope": "범위 이벤트는 주입하고 공식 API는 실제 호출. 브라우저 드래그 검증이 아님."
+}
