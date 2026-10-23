@@ -24,7 +24,8 @@ def build_map_html(javascript_key, workplace=None, radius_km=3.0, stations=None,
     # HTML의 script 종료 태그를 데이터로 삽입할 수 없게 한다.
     payload = payload.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
     gradient=(Path(__file__).resolve().parent/'map_gradient.js').read_text(encoding='utf-8')
-    return TEMPLATE.replace('__GRADIENT_CODE__',gradient).replace("__KEY__", quote(javascript_key, safe="")).replace("__DATA__", payload)
+    bikes=(Path(__file__).resolve().parent/'map_bikes.js').read_text(encoding='utf-8')
+    return TEMPLATE.replace('__BIKE_CODE__',bikes).replace('__GRADIENT_CODE__',gradient).replace("__KEY__", quote(javascript_key, safe="")).replace("__DATA__", payload)
 
 
 TEMPLATE = r'''
@@ -37,11 +38,13 @@ TEMPLATE = r'''
 <label>연령 지도 <select id="layer-age"><option value="composition" selected>20~39세 ↔ 60세 이상 구성</option><option value="">기본 영역</option><option value="20">20대 비율</option><option value="30">30대 비율</option><option value="40">40대 비율</option><option value="50">50대 비율</option><option value="60">60대 비율</option></select></label>
 <div style="display:flex;align-items:center;gap:8px;margin-top:6px"><span>20~39세 비중 우세</span><span style="display:inline-block;width:130px;height:12px;background:linear-gradient(to right,#16a34a,#facc15,#dc2626)"></span><span>60세 이상 비중 우세</span><span> · 자료 없음: 회색</span></div>
 <span id="age-note">선택 동네의 조회된 주민등록 자료만 표시</span></div>
+<div id="bike-note" style="padding:3px 8px;background:#f1f5f9;color:#166534;font-size:12px"></div>
 <div id="viewport-status" role="status" style="padding:5px 8px;background:#eff6ff;color:#1d4ed8;font-size:12px">지도 화면 범위를 확인하고 있습니다…</div>
 <div id="error" role="alert"></div><div id="map" aria-label="직장과 탐색 범위 지도"></div>
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=__KEY__&autoload=false"></script>
 <script>
 __GRADIENT_CODE__
+__BIKE_CODE__
 const data = __DATA__;
 function fail(){document.getElementById('error').textContent='지도 연결을 확인해주세요. 카카오맵 활성화, JavaScript 키, SDK 등록 도메인을 확인하세요.';}
 if(window.kakao && window.kakao.maps){
@@ -51,9 +54,9 @@ if(window.kakao && window.kakao.maps){
     map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
     const stationInfo = new kakao.maps.InfoWindow({removable:true,zIndex:20});
     const smoothAge=createAgeGradient(map,data);
-    const bikeLayers=[],facilityLayers=[],areaLayers=[];
+    const facilityLayers=[],areaLayers=[];
     const comparisonLayers=[];
-    document.getElementById('layer-bike').onchange=function(){bikeLayers.forEach(x=>x.setMap(this.checked?map:null));};
+    const bikeViewport=createBikeViewport(map,stationInfo,data.stations);
     document.getElementById('layer-facility').onchange=function(){facilityLayers.forEach(x=>x.setMap(this.checked?map:null));};
     document.getElementById('layer-age').onchange=function(){
       comparisonLayers.forEach(x=>x.setMap(this.value==='composition'?map:null));
@@ -70,23 +73,6 @@ if(window.kakao && window.kakao.maps){
       areaLayers.forEach(x=>x.setOptions({strokeOpacity:0,fillColor:color,fillOpacity:known?0.15+Math.min(value,100)/100*0.6:0.15}));
       document.getElementById('age-note').textContent=this.value?(known?this.value+'대 '+value+'% · 주민등록 기준월 '+data.explore.month:'해당 연령 자료 미조회 (회색)'):'선택 동네의 조회된 주민등록 자료만 표시';
     };
-    (data.stations || []).forEach(function(station){
-      const icon=document.createElement('button');icon.type='button';
-      icon.title='따릉이 · '+station.name;icon.setAttribute('aria-label',icon.title);
-      icon.style.cssText='width:23px;height:23px;background:#15803d;border:1px solid white;border-radius:50%;padding:2px;box-shadow:0 1px 3px #555;cursor:pointer';
-      icon.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="1.8"><circle cx="5.5" cy="16.5" r="4"/><circle cx="18.5" cy="16.5" r="4"/><path d="M5.5 16.5L10 8l5 8.5H5.5L9 10h8l1.5 6.5M8 6h4m3-2h3l2 5"/></svg>';
-      const marker = new kakao.maps.CustomOverlay({map:map,content:icon,zIndex:5,
-        position:new kakao.maps.LatLng(station.latitude,station.longitude),
-        title:'따릉이 · '+station.name});
-      bikeLayers.push(marker);
-      icon.addEventListener('click',function(){
-        const text = document.createElement('div');
-        text.style.cssText='padding:12px;min-width:160px;max-width:260px;white-space:normal';
-        text.textContent='따릉이 '+station.name+' · 선택 동네 대표점에서 직선 '+station.distance_m+'m';
-        stationInfo.setContent(text);
-        stationInfo.setPosition(new kakao.maps.LatLng(station.latitude,station.longitude));stationInfo.open(map);
-      });
-    });
     const facilityColors={parking:'#9333ea',subways:'#0284c7',ev_stations:'#16a34a',parks:'#15803d',bikes:'#0d9488'};
     const facilityBounds=new kakao.maps.LatLngBounds();
     (data.facilities || []).forEach(function(facility){
@@ -171,6 +157,7 @@ if(window.kakao && window.kakao.maps){
     const viewportKey=bounds=>['south','west','north','east'].map(k=>Number(bounds[k]).toFixed(6)).join(':');
     window.addEventListener('message',event=>{
       if(event.source!==window.parent || event.data.type!=='zipchack:data')return;
+      if(event.data.stations)bikeViewport.setStations(event.data.stations);
       const incoming=new Map((event.data.regions||[]).map(r=>[r.code,r]));
       (data.age_regions||[]).forEach(region=>{if(incoming.has(region.code))Object.assign(region,incoming.get(region.code));});
       if(event.data.explore)data.explore=event.data.explore;

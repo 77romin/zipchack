@@ -11,7 +11,7 @@ from map_explore import map_card,read_boundaries
 from bike_data import load_stations, bundled_stations, SOURCE_URL
 from map_data_view import map_region,district_regions
 from boundary_data import bundled_boundaries
-from map_viewport import render_viewport
+from map_viewport import render_viewport,update_population
 from geo import stations_within
 from seoul_api import fetch_citydata, SeoulDataError
 from city_view import render_citydata
@@ -410,9 +410,7 @@ with st.sidebar:
 map_column,chat_column=st.columns([2,1],gap='large')
 with map_column:
     st.subheader('동네 지도')
-    map_stations=[]
-    if bike_result and map_neighborhood:
-        map_stations=stations_within(bike_result['stations'],map_neighborhood['latitude'],map_neighborhood['longitude'],3)
+    map_stations=bike_result['stations'] if bike_result else []
     if not kakao_javascript_key:
         st.warning('지도 연결 설정이 필요합니다. 사이드바에서 설정과 자료를 확인해주세요.')
     else:
@@ -420,9 +418,14 @@ with map_column:
         card=map_card(map_neighborhood,st.session_state.get('rent_result'),st.session_state.get('conversation_conditions') or conditions,
             bike_result,st.session_state.get('resident_data',{}),map_month)
         regions=district_regions(map_neighborhood,map_month)
-        render_viewport(build_map_html(kakao_javascript_key,workplace_location,radius_km,map_stations,city_facilities+lifestyle_facilities,
+        viewport_value=render_viewport(build_map_html(kakao_javascript_key,workplace_location,radius_km,map_stations,city_facilities+lifestyle_facilities,
             map_neighborhood,card,boundaries.get((map_neighborhood or {}).get('legal_code')),regions),
             regions=regions,explore=card,navigation=str((map_neighborhood or {}).get('legal_code'))+':'+str(workplace_location),
-            month=map_month,controls=age_controls)
+            month=map_month,stations=map_stations,defer_population=True)
 with chat_column:
     render_chat(score_context,commute_context,map_neighborhood)
+
+# 대화 위젯이 등록된 뒤 범위 조회를 처리해 지도 갱신 중에도 검색 옵션을 유지한다.
+if kakao_javascript_key:
+    with age_controls:
+        update_population(viewport_value,regions,map_month)

@@ -39,13 +39,15 @@ def visible_codes(bounds,geometries):
                 codes.append(code);break
     return codes
 
-def render_viewport(html,regions,explore,navigation,month,controls=None):
-    value=_viewport_component(html=html,regions=regions,explore=explore,navigation=navigation,status=st.session_state.get('viewport_status'),key='housing_viewport',default=None)
-    with controls if controls is not None else nullcontext():
-        _render_population(value,regions,month)
+def render_viewport(html,regions,explore,navigation,month,controls=None,stations=None,defer_population=False):
+    value=_viewport_component(html=html,regions=regions,explore=explore,navigation=navigation,status=st.session_state.get('viewport_status'),stations=stations,key='housing_viewport',default=None)
+    if not defer_population:
+        with controls if controls is not None else nullcontext():
+            update_population(value,regions,month)
+    return value
 
 
-def _render_population(value,regions,month):
+def update_population(value,regions,month):
     if not value or not month:return
     try:
         bounds=validate_viewport(value)
