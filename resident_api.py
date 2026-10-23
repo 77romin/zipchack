@@ -8,6 +8,12 @@ from rent_api import number
 
 SOURCE_URL='https://www.data.go.kr/data/15108074/openapi.do'
 
+class ResidentLookupError(ValueError):
+    def __init__(self,category,message):
+        super().__init__(message)
+        self.category=category
+
+
 def parse_residents(content,code,month):
     if len(content)>2*1024*1024:
         raise ValueError('주민등록 응답 크기가 너무 큽니다.')
@@ -16,8 +22,10 @@ def parse_residents(content,code,month):
     except ET.ParseError:
         raise ValueError('주민등록 XML 응답을 읽지 못했습니다.') from None
     if root.findtext('.//head/resultCode') not in {'00','000','0','INFO-000'}:
-        raise ValueError('주민등록 API가 요청을 처리하지 못했습니다. 이 API의 활용신청·키·조회월을 확인해주세요.')
+        raise ResidentLookupError('api_rejected','주민등록 API가 요청을 처리하지 못했습니다. 이 API의 활용신청·키·조회월을 확인해주세요.')
     items=root.findall('.//item')
+    if root.findtext('.//head/totalCount')=='0' and not items:
+        raise ResidentLookupError('no_data','요청한 법정동·기준월의 자료가 없습니다.')
     if root.findtext('.//head/totalCount')!='1' or len(items)!=1:
         raise ValueError('법정동 단일 집계를 확인하지 못했습니다. 여러 행·통반 자료를 임의로 합산하지 않습니다.')
     item=items[0]
@@ -51,8 +59,10 @@ def fetch_residents(code,month,api_key):
                               params={'serviceKey':unquote(api_key.strip()),'stdgCd':code,'srchFrYm':month,
                                       'srchToYm':month,'lv':7,'regSeCd':2,'type':'XML','pageNo':1,'numOfRows':100},timeout=(5,20))
         response.raise_for_status()
+    except requests.HTTPError:
+        raise ResidentLookupError('http_error','주민등록 서버가 HTTP 오류를 반환했습니다.') from None
     except requests.RequestException:
-        raise ValueError('주민등록 API 연결에 실패했습니다. 키·사용 권한·네트워크 상태를 확인해주세요.') from None
+        raise ResidentLookupError('connection','주민등록 API 연결에 실패했습니다. 키·사용 권한·네트워크 상태를 확인해주세요.') from None
     return parse_residents(response.content,code,month)
 
 def preferred_share(data,ages):
