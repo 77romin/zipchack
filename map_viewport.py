@@ -1,5 +1,6 @@
 """지도 범위 이벤트 연결과 범위 내 법정동 자료 조회."""
 import math,os,time
+from contextlib import nullcontext
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor,as_completed
 import streamlit as st
@@ -38,8 +39,13 @@ def visible_codes(bounds,geometries):
                 codes.append(code);break
     return codes
 
-def render_viewport(html,regions,explore,navigation,month):
+def render_viewport(html,regions,explore,navigation,month,controls=None):
     value=_viewport_component(html=html,regions=regions,explore=explore,navigation=navigation,status=st.session_state.get('viewport_status'),key='housing_viewport',default=None)
+    with controls if controls is not None else nullcontext():
+        _render_population(value,regions,month)
+
+
+def _render_population(value,regions,month):
     if not value or not month:return
     try:
         bounds=validate_viewport(value)

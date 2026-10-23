@@ -59,7 +59,7 @@ if "housing_conditions" not in st.session_state:
 # 왼쪽 설정 영역
 with st.sidebar:
     st.title("집.착")
-    st.caption("내 맘에 착, 내 삶에 착.")
+    st.caption("수동 설정과 검증 · 필요할 때 펼쳐 확인하세요.")
 
     st.subheader("나의 조건")
 
@@ -152,62 +152,62 @@ with st.sidebar:
 
 # 메인 화면
 st.title("나에게 착 맞는 집과 동네")
-st.caption("예산부터 출근길까지, 내 생활을 기준으로 찾아보세요!")
+st.caption("원하는 집과 동네를 대화로 찾아보세요.")
 
 conditions = st.session_state.housing_conditions
 
-if conditions is None:
-    st.info("오른쪽 대화로 주거 조건을 알려주세요. 왼쪽 입력 화면도 사용할 수 있습니다.")
-else:
-    st.write(f"**직장:** {conditions['workplace']}")
+with st.sidebar.expander('적용된 조건 확인'):
+    if conditions is None:
+        st.info("대화로 조건을 알려주거나 이 사이드바에서 직접 설정하세요.")
+    else:
+        st.write(f"**직장:** {conditions['workplace']}")
 
-    st.caption(
-        f"직장 기준 탐색 반경: "
-        f"{conditions.get('search_radius_km', 3.0):g}km "
-        f"· 직선거리 기준"
-    )
+        st.caption(
+            f"직장 기준 탐색 반경: "
+            f"{conditions.get('search_radius_km', 3.0):g}km "
+            f"· 직선거리 기준"
+        )
 
-    st.caption(
-        f"월세 탐색 · "
-        f"보증금 {conditions['deposit_max']:,}만원 이하 · "
-        f"월세 {conditions['rent_max']:,}만원 이하"
-    )
+        st.caption(
+            f"월세 탐색 · "
+            f"보증금 {conditions['deposit_max']:,}만원 이하 · "
+            f"월세 {conditions['rent_max']:,}만원 이하"
+        )
 
-    preferences = conditions.get("preferences")
+        preferences = conditions.get("preferences")
 
-    if preferences is not None:
-        age_min, age_max = conditions["preferred_age_range"]
+        if preferences is not None:
+            age_min, age_max = conditions["preferred_age_range"]
 
-        preference_labels = []
+            preference_labels = []
 
-        if preferences["park"] > 0:
-            preference_labels.append(
-                f"공원 {preferences['park']}/5"
-            )
+            if preferences["park"] > 0:
+                preference_labels.append(
+                    f"공원 {preferences['park']}/5"
+                )
 
-        if preferences["bike"] > 0:
-            preference_labels.append(
-                f"따릉이 {preferences['bike']}/5"
-            )
+            if preferences["bike"] > 0:
+                preference_labels.append(
+                    f"따릉이 {preferences['bike']}/5"
+                )
 
-        if preferences["age"] > 0:
-            preference_labels.append(
-                f"{age_min}~{age_max}세 주민 비율 "
-                f"{preferences['age']}/5"
-            )
+            if preferences["age"] > 0:
+                preference_labels.append(
+                    f"{age_min}~{age_max}세 주민 비율 "
+                    f"{preferences['age']}/5"
+                )
 
-        if preference_labels:
-            st.caption(
-                "적용한 선호 · " + " · ".join(preference_labels)
-            )
-        else:
-            st.caption(
-                "생활 선호 없이 예산 조건으로 탐색합니다."
-            )
+            if preference_labels:
+                st.caption(
+                    "적용한 선호 · " + " · ".join(preference_labels)
+                )
+            else:
+                st.caption(
+                    "생활 선호 없이 예산 조건으로 탐색합니다."
+                )
 
-        with st.expander("저장된 조건 확인"):
-            st.json(conditions)
-
+            with st.expander("저장된 조건 확인"):
+                st.json(conditions)
 
 workplace_location = None
 if "workplace_search_revision" not in st.session_state:
@@ -381,58 +381,48 @@ with st.sidebar:
             try:boundaries.update(read_boundaries(boundary_file.getvalue()))
             except (ValueError,KeyError,TypeError):st.warning('경계 파일의 코드·좌표·형식을 확인해주세요.')
 
-map_column, chat_column = st.columns([2, 1], gap="large")
-
-with map_column:
-    map_slot=st.container()
-
-    if nearby_stations:
-        with st.expander("주변 따릉이 대여소 목록"):
-            st.caption("출처: 서울특별시 대여소 위치 자료 · 자료 기준일은 내려받은 원본에서 확인해주세요.")
-            st.dataframe([
-                {"대여소":x["name"], "직장에서 직선거리(m)":x["distance_m"]}
-                for x in nearby_stations
-            ], hide_index=True)
-
-    neighborhood=render_rents(st.session_state.get("conversation_conditions") or conditions)
-    lifestyle_facilities=render_lifestyle(neighborhood,st.session_state.get("conversation_conditions") or conditions,bike_result,park_data)
-    with map_slot:
-        st.subheader("추천 지도")
-        st.caption('법정동 경계: 국가공간정보포털 2023-07-29 공개 자료의 KnellBalm 변환본 · 현재 경계와 차이가 있을 수 있습니다. 회색은 인구 구성 미확인입니다.')
-        st.caption('연령 지도 색상은 동별 통계를 부드럽게 혼합한 시각화입니다. 경계 부근의 색은 해당 위치의 실측 연령 비율이 아니며, 클릭하면 동별 원래 수치를 확인할 수 있습니다.')
+# 수동 조회·검증은 사이드바에서 수행하고 결과만 지도/대화에 전달한다.
+with st.sidebar:
+    with st.expander('전월세 거래 수동 조회·확인'):
+        neighborhood=render_rents(st.session_state.get('conversation_conditions') or conditions)
+    with st.expander('생활 인프라 수동 확인'):
+        lifestyle_facilities=render_lifestyle(neighborhood,st.session_state.get('conversation_conditions') or conditions,bike_result,park_data)
+        if nearby_stations:
+            st.dataframe([{'대여소':x['name'],'직장에서 직선거리(m)':x['distance_m']} for x in nearby_stations],hide_index=True)
+    with st.expander('지도 위치·자료 확인'):
         map_neighborhood,map_month=map_region(neighborhood)
-        map_stations=[]
-        if bike_result and map_neighborhood:
-            map_stations=stations_within(bike_result['stations'],map_neighborhood['latitude'],map_neighborhood['longitude'],3)
-            st.caption(f"선택 동네 대표점 3km 안 따릉이 대여소 {len(map_stations)}곳 · 지도에서 켜고 끌 수 있어요.")
-        if not kakao_javascript_key:
-            st.warning(".env에 KAKAO_JAVASCRIPT_KEY를 설정해주세요.")
-        else:
-            radius_km = conditions.get("search_radius_km", 3.0) if conditions else 3.0
-            card=map_card(map_neighborhood,st.session_state.get('rent_result'),st.session_state.get('conversation_conditions') or conditions,
-                          bike_result,st.session_state.get('resident_data',{}),map_month)
-            render_viewport(
-                build_map_html(kakao_javascript_key, workplace_location, radius_km, map_stations, city_facilities+lifestyle_facilities, map_neighborhood,card,boundaries.get((map_neighborhood or {}).get('legal_code')),
-                    district_regions(map_neighborhood,map_month)),
-                regions=district_regions(map_neighborhood,map_month),explore=card,
-                navigation=str((map_neighborhood or {}).get('legal_code'))+':'+str(workplace_location),month=map_month,
-            )
-        st.caption("파란 원은 직선거리 탐색 범위이며 실제 통근 가능 영역이 아닙니다.")
-        if neighborhood:
-            st.caption('주황색 이름표는 선택 동네의 대표점입니다. 거래가 있었던 집의 위치나 실제 통근 가능 범위가 아닙니다.')
+        st.caption('법정동 경계: 2023-07-29 공개 자료의 KnellBalm 변환본. 현재 경계와 차이가 있을 수 있습니다.')
+        st.caption('연령 색상은 동별 통계를 부드럽게 혼합한 시각화이며 경계 부근의 실측 비율이 아닙니다. 동을 누르면 원래 수치를 확인할 수 있습니다.')
+        st.caption('파란 원은 직선거리 탐색 범위입니다. 동네 이름표는 대표점이며 개별 주택이나 통근 가능 범위를 뜻하지 않습니다.')
+    with st.expander('통근시간 수동 검증'):
+        commute_context=render_commute(neighborhood,workplace_location,st.session_state.get('conversation_conditions') or conditions,
+            st.session_state.get('rent_result'),st.session_state.get('neighborhood_locations',{}))
+        commute_context['workplace_query']=(st.session_state.get('workplace_search') or {}).get('query')
+    with st.expander('추천 점수·환경 근거 확인'):
+        score_context=render_housing_scores(st.session_state.get('rent_result'),st.session_state.get('conversation_conditions') or conditions,
+            st.session_state.get('neighborhood_locations',{}),bike_result,park_data)
+        if city_data:render_citydata(city_data)
+        render_place_comparison(city_data,city_preferences)
+    with st.expander('동네 근거 수동 질문·검증'):
+        render_rag(neighborhood)
+    age_controls=st.expander('지도 연령 조회 상태·재시도')
 
-    commute_context=render_commute(
-        neighborhood,workplace_location,st.session_state.get('conversation_conditions') or conditions,
-        st.session_state.get('rent_result'),st.session_state.get('neighborhood_locations',{}))
-    commute_context['workplace_query']=(st.session_state.get('workplace_search') or {}).get('query')
-    score_context=render_housing_scores(
-        st.session_state.get('rent_result'),st.session_state.get('conversation_conditions') or conditions,
-        st.session_state.get('neighborhood_locations',{}),bike_result,park_data)
-    if city_data:
-        render_citydata(city_data)
-    render_place_comparison(city_data, city_preferences)
-
+map_column,chat_column=st.columns([2,1],gap='large')
+with map_column:
+    st.subheader('동네 지도')
+    map_stations=[]
+    if bike_result and map_neighborhood:
+        map_stations=stations_within(bike_result['stations'],map_neighborhood['latitude'],map_neighborhood['longitude'],3)
+    if not kakao_javascript_key:
+        st.warning('지도 연결 설정이 필요합니다. 사이드바에서 설정과 자료를 확인해주세요.')
+    else:
+        radius_km=conditions.get('search_radius_km',3.0) if conditions else 3.0
+        card=map_card(map_neighborhood,st.session_state.get('rent_result'),st.session_state.get('conversation_conditions') or conditions,
+            bike_result,st.session_state.get('resident_data',{}),map_month)
+        regions=district_regions(map_neighborhood,map_month)
+        render_viewport(build_map_html(kakao_javascript_key,workplace_location,radius_km,map_stations,city_facilities+lifestyle_facilities,
+            map_neighborhood,card,boundaries.get((map_neighborhood or {}).get('legal_code')),regions),
+            regions=regions,explore=card,navigation=str((map_neighborhood or {}).get('legal_code'))+':'+str(workplace_location),
+            month=map_month,controls=age_controls)
 with chat_column:
-    render_chat(score_context,commute_context)
-    st.divider()
-    render_rag(neighborhood)
+    render_chat(score_context,commute_context,map_neighborhood)
