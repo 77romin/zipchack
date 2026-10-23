@@ -1,0 +1,30 @@
+{
+  "metadata": {
+    "count": 467,
+    "items": 467,
+    "sample": {
+      "text": "동네명: 청운동\n전체 이름: 서울특별시 종로구 청운동\n법정동 코드: 1111010100\n자치구: 종로구\n단위: 법정동\n공식 코드 목록 상태: 존재\n이 목록은 행정동 경계·인구·가격·통근시간·주거 적합도를 제공하지 않습니다.",
+      "metadata": {
+        "kind": "metadata",
+        "observed_at": "2026-10-22T14:47:59.206986+09:00",
+        "chunk_overlap": 200,
+        "chunk_size": 1000,
+        "title": "서울특별시 종로구 청운동",
+        "fingerprint": "65e5b24948a19f66649529e24a23061a8722be92ff1d72c72a612c6431c1cdd7",
+        "source_url": "https://www.code.go.kr/stdcode/regCodeL.do",
+        "chunk_index": 0,
+        "document_id": "legal-dong",
+        "item_id": "1111010100"
+      }
+    }
+  },
+  "external": {
+    "count": 146,
+    "items": 6
+  },
+  "security": {
+    "tracked_env": false,
+    "configured_secret_matches": [],
+    "scope": "current git tracked files; no history scan"
+  }
+}
