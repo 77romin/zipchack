@@ -1,3 +1,6 @@
+from app_startup import check_runtime
+check_runtime()
+
 import requests
 from kakao_api import search_workplace
 
