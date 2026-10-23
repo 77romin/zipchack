@@ -37,6 +37,7 @@ TEMPLATE = r'''
 <label>연령 지도 <select id="layer-age"><option value="composition" selected>20~39세 ↔ 60세 이상 구성</option><option value="">기본 영역</option><option value="20">20대 비율</option><option value="30">30대 비율</option><option value="40">40대 비율</option><option value="50">50대 비율</option><option value="60">60대 비율</option></select></label>
 <div style="display:flex;align-items:center;gap:8px;margin-top:6px"><span>20~39세 비중 우세</span><span style="display:inline-block;width:130px;height:12px;background:linear-gradient(to right,#16a34a,#facc15,#dc2626)"></span><span>60세 이상 비중 우세</span><span> · 자료 없음: 회색</span></div>
 <span id="age-note">선택 동네의 조회된 주민등록 자료만 표시</span></div>
+<div id="viewport-status" role="status" style="padding:5px 8px;background:#eff6ff;color:#1d4ed8;font-size:12px">지도 화면 범위를 확인하고 있습니다…</div>
 <div id="error" role="alert"></div><div id="map" aria-label="직장과 탐색 범위 지도"></div>
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=__KEY__&autoload=false"></script>
 <script>
@@ -166,18 +167,29 @@ if(window.kakao && window.kakao.maps){
       });
     });
     document.getElementById('layer-age').onchange();
+    let lastViewportKey='';
+    const viewportKey=bounds=>['south','west','north','east'].map(k=>Number(bounds[k]).toFixed(6)).join(':');
     window.addEventListener('message',event=>{
       if(event.source!==window.parent || event.data.type!=='zipchack:data')return;
       const incoming=new Map((event.data.regions||[]).map(r=>[r.code,r]));
       (data.age_regions||[]).forEach(region=>{if(incoming.has(region.code))Object.assign(region,incoming.get(region.code));});
       if(event.data.explore)data.explore=event.data.explore;
+      const status=event.data.status;
+      if(status && status.bounds && viewportKey(status.bounds)===lastViewportKey){
+        document.getElementById('viewport-status').textContent=status.message;
+      }
       document.getElementById('layer-age').onchange();
     });
     let viewportTimer;
     function publishViewport(){
       if(!window.parent || typeof map.getBounds!=='function')return;
       const bounds=map.getBounds(),sw=bounds.getSouthWest(),ne=bounds.getNorthEast();
-      window.parent.postMessage({type:'zipchack:viewport',viewport:{south:sw.getLat(),west:sw.getLng(),north:ne.getLat(),east:ne.getLng()}},'*');
+      const viewport={south:sw.getLat(),west:sw.getLng(),north:ne.getLat(),east:ne.getLng()};
+      const key=viewportKey(viewport);
+      if(key===lastViewportKey)return;
+      lastViewportKey=key;
+      document.getElementById('viewport-status').textContent='현재 화면의 연령 자료 조회 중… 회색 영역은 조회 완료 후 갱신됩니다.';
+      window.parent.postMessage({type:'zipchack:viewport',viewport:viewport},'*');
     }
     kakao.maps.event.addListener(map,'idle',()=>{
       window.clearTimeout(viewportTimer);viewportTimer=window.setTimeout(publishViewport,500);
