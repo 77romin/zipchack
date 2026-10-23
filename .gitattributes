@@ -2,3 +2,4 @@
 data/*.csv -text whitespace=cr-at-eol
 data/*.jsonl -text
 *.sh text eol=lf
+data/*.geojson -text

@@ -1,0 +1,13 @@
+{
+  "source_url": "https://github.com/KnellBalm/kr-admin-geojson",
+  "download_url": "https://raw.githubusercontent.com/KnellBalm/kr-admin-geojson/main/emd.geojson",
+  "original_provider": "국가공간정보포털(V-World), 공개 변환본 작성자 KnellBalm",
+  "boundary_date": "2023-07-29 (제공자 README 기준)",
+  "coordinate_system": "EPSG:4326",
+  "transformation": "제공자 재투영·단순화(tolerance0.0005도); 서울 추출; 공식 현존 법정동 코드·이름 일치 검증",
+  "license": "제공자 README: 원본 및 가공 결과 출처 표시 조건 자유 이용",
+  "original_sha256": "ca8d03b0df83e5d90f78b83090ef0ef03143c1be339cce9c448260005ac1e004",
+  "normalized_sha256": "6a160d1ecf59faca3b86ee871d5cd595a1254927e735a442dd592a5c1adbb4e5",
+  "matched": 467,
+  "unmatched": []
+}

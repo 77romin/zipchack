@@ -1,0 +1,15 @@
+{
+  "month": "202609",
+  "district": "11140",
+  "requested": 74,
+  "available": 68,
+  "failed": [
+    "1114010400",
+    "1114010600",
+    "1114010800",
+    "1114011000",
+    "1114012000",
+    "1114017000"
+  ],
+  "source_url": "https://www.data.go.kr/data/15108074/openapi.do"
+}

@@ -31,5 +31,5 @@ class ExploreTests(unittest.TestCase):
         card['lines'].append('</script><script>alert(1)</script>')
         html=build_map_html('key',neighborhood=point,explore=card)
         self.assertNotIn('</script><script>alert(1)',html)
-        for text in ['layer-age','layer-bike','대표점 주변 500m','showArea','fillOpacity']:
+        for text in ['layer-age','layer-bike','법정동 경계','showArea','fillOpacity']:
             self.assertIn(text,html)

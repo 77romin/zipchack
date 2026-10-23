@@ -9,7 +9,8 @@ from pathlib import Path
 from map_view import build_map_html
 from map_explore import map_card,read_boundaries
 from bike_data import load_stations, bundled_stations, SOURCE_URL
-from map_data_view import map_region
+from map_data_view import map_region,district_regions
+from boundary_data import bundled_boundaries
 from geo import stations_within
 from seoul_api import fetch_citydata, SeoulDataError
 from city_view import render_citydata
@@ -370,13 +371,13 @@ with st.sidebar:
     if park_data:
         st.caption(f"공원 좌표 {len(park_data['parks'])}개 · 제외/중복 {park_data['skipped']}행")
 
-boundaries={}
+boundaries=bundled_boundaries()
 with st.sidebar:
     with st.expander('지도 경계 자료 (선택)'):
-        st.caption('WGS84 GeoJSON, properties.legal_code에 법정동 10자리 코드. 행정동 경계를 법정동에 붙이지 마세요. 자료가 없으면 대표점 500m 범위를 표시합니다.')
+        st.caption('서울 법정동 기본 경계 제공. 최신 공식 WGS84 GeoJSON으로 교체할 수 있어요. properties.legal_code는 법정동 10자리 코드입니다.')
         boundary_file=st.file_uploader('법정동 경계 GeoJSON',type=['geojson','json'],key='boundary_file')
         if boundary_file:
-            try:boundaries=read_boundaries(boundary_file.getvalue())
+            try:boundaries.update(read_boundaries(boundary_file.getvalue()))
             except (ValueError,KeyError,TypeError):st.warning('경계 파일의 코드·좌표·형식을 확인해주세요.')
 
 map_column, chat_column = st.columns([2, 1], gap="large")
@@ -396,6 +397,7 @@ with map_column:
     lifestyle_facilities=render_lifestyle(neighborhood,st.session_state.get("conversation_conditions") or conditions,bike_result,park_data)
     with map_slot:
         st.subheader("추천 지도")
+        st.caption('법정동 경계: 국가공간정보포털 2023-07-29 공개 자료의 KnellBalm 변환본 · 현재 경계와 차이가 있을 수 있습니다. 회색은 인구 구성 미확인입니다.')
         map_neighborhood,map_month=map_region(neighborhood)
         map_stations=[]
         if bike_result and map_neighborhood:
@@ -409,7 +411,7 @@ with map_column:
                           bike_result,st.session_state.get('resident_data',{}),map_month)
             st.iframe(
                 build_map_html(kakao_javascript_key, workplace_location, radius_km, map_stations, city_facilities+lifestyle_facilities, map_neighborhood,card,boundaries.get((map_neighborhood or {}).get('legal_code')),
-                    [region for region in st.session_state.get('map_age_regions',{}).values() if region.get('month')==map_month and region['code'][:5]==str((map_neighborhood or {}).get('legal_code',''))[:5]]),
+                    district_regions(map_neighborhood,map_month)),
                 height=575,
             )
         st.caption("파란 원은 직선거리 탐색 범위이며 실제 통근 가능 영역이 아닙니다.")

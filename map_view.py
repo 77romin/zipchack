@@ -65,21 +65,26 @@ if(window.kakao && window.kakao.maps){
       document.getElementById('age-note').textContent=this.value?(known?this.value+'대 '+value+'% · 주민등록 기준월 '+data.explore.month:'해당 연령 자료 미조회 (회색)'):'선택 동네의 조회된 주민등록 자료만 표시';
     };
     (data.stations || []).forEach(function(station){
-      const marker = new kakao.maps.Marker({map:map,
+      const icon=document.createElement('button');icon.type='button';
+      icon.title='따릉이 · '+station.name;icon.setAttribute('aria-label',icon.title);
+      icon.style.cssText='width:23px;height:23px;background:#15803d;border:1px solid white;border-radius:50%;padding:2px;box-shadow:0 1px 3px #555;cursor:pointer';
+      icon.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="1.8"><circle cx="5.5" cy="16.5" r="4"/><circle cx="18.5" cy="16.5" r="4"/><path d="M5.5 16.5L10 8l5 8.5H5.5L9 10h8l1.5 6.5M8 6h4m3-2h3l2 5"/></svg>';
+      const marker = new kakao.maps.CustomOverlay({map:map,content:icon,zIndex:5,
         position:new kakao.maps.LatLng(station.latitude,station.longitude),
         title:'따릉이 · '+station.name});
       bikeLayers.push(marker);
-      kakao.maps.event.addListener(marker,'click',function(){
+      icon.addEventListener('click',function(){
         const text = document.createElement('div');
         text.style.cssText='padding:12px;min-width:160px;max-width:260px;white-space:normal';
         text.textContent='따릉이 '+station.name+' · 선택 동네 대표점에서 직선 '+station.distance_m+'m';
         stationInfo.setContent(text);
-        stationInfo.open(map,marker);
+        stationInfo.setPosition(new kakao.maps.LatLng(station.latitude,station.longitude));stationInfo.open(map);
       });
     });
     const facilityColors={parking:'#9333ea',subways:'#0284c7',ev_stations:'#16a34a',parks:'#15803d',bikes:'#0d9488'};
     const facilityBounds=new kakao.maps.LatLngBounds();
     (data.facilities || []).forEach(function(facility){
+      if(facility.kind==='bikes')return;
       const position=new kakao.maps.LatLng(facility.latitude,facility.longitude);
       facilityBounds.extend(position);
       const color=facilityColors[facility.kind] || '#64748b';
@@ -112,7 +117,7 @@ if(window.kakao && window.kakao.maps){
       new kakao.maps.CustomOverlay({map:map,position:position,content:label,yAnchor:2.6});
       const showArea=function(){
         const box=document.createElement('div');box.style.cssText='padding:12px;min-width:210px;max-width:310px;white-space:normal;color:#111;background:white';
-        const heading=document.createElement('strong');heading.textContent=neighborhood.name+' · '+(data.geometry?'제공 경계':'대표점 주변 500m · 실제 동네 경계 아님');box.appendChild(heading);
+        const heading=document.createElement('strong');heading.textContent=neighborhood.name+' · '+(data.geometry?'법정동 경계':'경계 자료 없음');box.appendChild(heading);
         ((data.explore||{}).lines||[]).forEach(line=>{const p=document.createElement('p');p.textContent=line;box.appendChild(p);});
         const rates=(data.explore||{}).age_rates||{};Object.keys(rates).forEach(age=>{const p=document.createElement('div');p.textContent=age+'대: '+rates[age]+'%';box.appendChild(p);});
         stationInfo.setContent(box);stationInfo.setPosition(position);stationInfo.open(map);
@@ -123,9 +128,6 @@ if(window.kakao && window.kakao.maps){
           const polygon=new kakao.maps.Polygon({map:map,path:path,strokeWeight:2,strokeColor:'#ea580c',fillColor:'#f97316',fillOpacity:0.15});
           areaLayers.push(polygon);kakao.maps.event.addListener(polygon,'click',showArea);
         });
-      }else{
-        const area=new kakao.maps.Circle({map:map,center:position,radius:500,strokeColor:'#ea580c',strokeWeight:2,fillColor:'#f97316',fillOpacity:0.15});
-        areaLayers.push(area);kakao.maps.event.addListener(area,'click',showArea);
       }
       label.addEventListener('click',showArea);
       kakao.maps.event.addListener(marker,'click',function(){
@@ -145,12 +147,16 @@ if(window.kakao && window.kakao.maps){
       const position=new kakao.maps.LatLng(region.latitude,region.longitude);ageBounds.extend(position);
       if(data.neighborhood && region.code===data.neighborhood.legal_code)return;
       const c=region.composition;
-      const circle=new kakao.maps.Circle({map:map,center:position,radius:350,strokeColor:'#475569',strokeWeight:1,fillColor:c?c.color:'#94a3b8',fillOpacity:0.48});
-      comparisonLayers.push(circle);
-      kakao.maps.event.addListener(circle,'click',()=>{
+      if(!region.geometry)return;
+      const polygons=region.geometry.type==='MultiPolygon'?region.geometry.coordinates:[region.geometry.coordinates];
+      polygons.forEach(rings=>{
+      const polygon=new kakao.maps.Polygon({map:map,path:rings.map(ring=>ring.map(p=>new kakao.maps.LatLng(p[1],p[0]))),strokeColor:'#64748b',strokeOpacity:0.6,strokeWeight:1,fillColor:c?c.color:'#94a3b8',fillOpacity:0.48});
+      comparisonLayers.push(polygon);
+      kakao.maps.event.addListener(polygon,'click',()=>{
         const box=document.createElement('div');box.style.cssText='padding:12px;max-width:280px;white-space:normal';
-        box.textContent=region.name+' · 대표점 주변 350m (실제 경계 아님) · '+region.month+' 주민등록 · '+(c?'20~39세 '+c.young_share+'% / 60세 이상 '+c.older_share+'%':'자료 없음');
+        box.textContent=region.name+' · 법정동 경계(2023 자료) · '+region.month+' 주민등록 · '+(c?'20~39세 '+c.young_share+'% / 60세 이상 '+c.older_share+'%':'자료 없음');
         stationInfo.setContent(box);stationInfo.setPosition(position);stationInfo.open(map);
+      });
       });
     });
     if(data.age_regions && data.age_regions.length>1)map.setBounds(ageBounds);
