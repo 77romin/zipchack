@@ -7,7 +7,7 @@ from kakao_api import search_workplace
 import os
 from pathlib import Path
 from map_view import build_map_html
-from map_explore import map_card,read_boundaries
+from map_explore import map_card,read_boundaries,region_cards
 from bike_data import load_stations, bundled_stations, SOURCE_URL
 from map_data_view import map_region,district_regions
 from boundary_data import bundled_boundaries
@@ -416,8 +416,9 @@ with map_column:
     else:
         radius_km=conditions.get('search_radius_km',3.0) if conditions else 3.0
         card=map_card(map_neighborhood,st.session_state.get('rent_result'),st.session_state.get('conversation_conditions') or conditions,
-            bike_result,st.session_state.get('resident_data',{}),map_month)
-        regions=district_regions(map_neighborhood,map_month)
+            bike_result,st.session_state.get('resident_data',{}),map_month,park_data)
+        regions=region_cards(district_regions(map_neighborhood,map_month),map_neighborhood,st.session_state.get('rent_result'),
+            st.session_state.get('conversation_conditions') or conditions,bike_result,park_data,st.session_state.get('resident_data',{}),map_month)
         viewport_value=render_viewport(build_map_html(kakao_javascript_key,workplace_location,radius_km,map_stations,city_facilities+lifestyle_facilities,
             map_neighborhood,card,boundaries.get((map_neighborhood or {}).get('legal_code')),regions),
             regions=regions,explore=card,navigation=str((map_neighborhood or {}).get('legal_code'))+':'+str(workplace_location),

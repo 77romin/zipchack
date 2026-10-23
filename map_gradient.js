@@ -1,6 +1,6 @@
 // 동별 원자료를 바꾸지 않는 시각적 평활화. 미확인 영역은 보간하지 않는다.
 function createAgeGradient(map, data) {
-  const holder=document.createElement('div');
+  const holder=document.createElement('div');holder.className='zip-age-gradient';
   holder.style.cssText='pointer-events:none;line-height:0';
   const canvas=document.createElement('canvas');holder.appendChild(canvas);
   const overlay=new kakao.maps.CustomOverlay({map:map,content:holder,xAnchor:0.5,yAnchor:0.5,zIndex:1});

@@ -31,6 +31,7 @@ def build_map_html(javascript_key, workplace=None, radius_km=3.0, stations=None,
 TEMPLATE = r'''
 <!DOCTYPE html><html lang="ko"><head><meta charset="utf-8">
 <style>html,body{margin:0;padding:0;font-family:sans-serif}#map{width:100%;height:500px;border-radius:12px}
+#map .zip-age-gradient,#map div:has(>.zip-age-gradient){pointer-events:none!important}
 #error{padding:12px;color:#b91c1c}#error:empty{display:none}</style></head><body>
 <div style="padding:8px;background:#f1f5f9;color:#0f172a;font-size:13px">
 <label><input type="checkbox" id="layer-bike" checked>따릉이 대여소</label>
@@ -53,6 +54,19 @@ if(window.kakao && window.kakao.maps){
     const map = new kakao.maps.Map(document.getElementById('map'), {center:center, level:7});
     map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
     const stationInfo = new kakao.maps.InfoWindow({removable:true,zIndex:20});
+    function showRegionCard(name,card,position){
+      const box=document.createElement('div');box.style.cssText='padding:12px;width:290px;max-height:330px;overflow-y:auto;white-space:normal;color:#111;background:white;font-size:13px';
+      const heading=document.createElement('strong');heading.textContent=name+' · 동네 정보';box.appendChild(heading);
+      const note=document.createElement('p');note.textContent='법정동 경계(2023 자료) · 개별 주택 아님';box.appendChild(note);
+      (card?.lines||['자료 미확인']).forEach(line=>{const p=document.createElement('p');p.textContent=line;box.appendChild(p);});
+      Object.entries(card?.age_rates||{}).forEach(([age,rate])=>{const p=document.createElement('div');p.textContent=age+'대 '+rate+'%';box.appendChild(p);});
+      (card?.sources||[]).forEach(source=>{
+        if(!/^https?:\/\//i.test(source.url||''))return;
+        const link=document.createElement('a');link.textContent=source.title;link.href=source.url;link.target='_blank';link.rel='noopener noreferrer';link.style.cssText='display:block;margin-top:6px;color:#0369a1';box.appendChild(link);
+      });
+      stationInfo.setContent(box);stationInfo.setPosition(position);stationInfo.open(map);
+    }
+
     const smoothAge=createAgeGradient(map,data);
     const facilityLayers=[],areaLayers=[];
     const comparisonLayers=[];
@@ -63,7 +77,7 @@ if(window.kakao && window.kakao.maps){
       smoothAge.setEnabled(this.value==='composition');
       if(this.value==='composition'){
         const composition=(data.explore||{}).composition;
-        areaLayers.forEach(x=>x.setOptions({fillOpacity:0,strokeOpacity:0}));
+        areaLayers.forEach(x=>x.setOptions({fillOpacity:0.001,strokeOpacity:0}));
         document.getElementById('age-note').textContent=composition?'20~39세 '+composition.young_share+'% / 60세 이상 '+composition.older_share+'% · 주민등록 '+data.explore.month:'연령 구성 자료 없음 (회색)';
         return;
       }
@@ -102,17 +116,13 @@ if(window.kakao && window.kakao.maps){
     if(data.neighborhood){
       const neighborhood=data.neighborhood;
       const position=new kakao.maps.LatLng(neighborhood.latitude,neighborhood.longitude);
-      const marker=new kakao.maps.Marker({map:map,position:position,title:neighborhood.name+' · 동네 대표 위치'});
-      const label=document.createElement('div');
-      label.style.cssText='padding:6px 10px;background:#c2410c;color:white;border-radius:8px;font-size:13px;white-space:nowrap';
+      const marker=new kakao.maps.Marker({map:map,position:position,zIndex:8,title:neighborhood.name+' · 동네 대표 위치'});
+      const label=document.createElement('button');label.type='button';
+      label.style.cssText='padding:6px 10px;background:#c2410c;color:white;border:0;border-radius:8px;font-size:13px;white-space:nowrap;cursor:pointer';
       label.textContent=neighborhood.name+' · 대표점';
-      new kakao.maps.CustomOverlay({map:map,position:position,content:label,yAnchor:2.6});
-      const showArea=function(){
-        const box=document.createElement('div');box.style.cssText='padding:12px;min-width:210px;max-width:310px;white-space:normal;color:#111;background:white';
-        const heading=document.createElement('strong');heading.textContent=neighborhood.name+' · '+(data.geometry?'법정동 경계':'경계 자료 없음');box.appendChild(heading);
-        ((data.explore||{}).lines||[]).forEach(line=>{const p=document.createElement('p');p.textContent=line;box.appendChild(p);});
-        const rates=(data.explore||{}).age_rates||{};Object.keys(rates).forEach(age=>{const p=document.createElement('div');p.textContent=age+'대: '+rates[age]+'%';box.appendChild(p);});
-        stationInfo.setContent(box);stationInfo.setPosition(position);stationInfo.open(map);
+      new kakao.maps.CustomOverlay({map:map,position:position,content:label,yAnchor:2.6,clickable:true,zIndex:8});
+      const showArea=function(event){
+        showRegionCard(neighborhood.name,data.explore,(event||{}).latLng||position);
       };
       if(data.geometry){
         const polygons=data.geometry.type==='MultiPolygon'?data.geometry.coordinates:[data.geometry.coordinates];
@@ -122,12 +132,7 @@ if(window.kakao && window.kakao.maps){
         });
       }
       label.addEventListener('click',showArea);
-      kakao.maps.event.addListener(marker,'click',function(){
-        const text=document.createElement('div');
-        text.style.cssText='padding:12px;min-width:190px;max-width:280px;white-space:normal';
-        text.textContent=neighborhood.name+' · 동네 대표 위치(개별 주택 아님) · 계약월 '+neighborhood.month+' · 예산에 맞는 조회 거래 '+neighborhood.count+'건';
-        stationInfo.setContent(text);stationInfo.open(map,marker);
-      });
+      kakao.maps.event.addListener(marker,'click',showArea);
       const bounds=new kakao.maps.LatLngBounds();
       bounds.extend(position);
       if(data.workplace){bounds.extend(center);map.setBounds(bounds);}
@@ -142,13 +147,10 @@ if(window.kakao && window.kakao.maps){
       if(!region.geometry)return;
       const polygons=region.geometry.type==='MultiPolygon'?region.geometry.coordinates:[region.geometry.coordinates];
       polygons.forEach(rings=>{
-      const polygon=new kakao.maps.Polygon({map:map,path:rings.map(ring=>ring.map(p=>new kakao.maps.LatLng(p[1],p[0]))),strokeOpacity:0,strokeWeight:0,fillOpacity:0});
+      const polygon=new kakao.maps.Polygon({map:map,path:rings.map(ring=>ring.map(p=>new kakao.maps.LatLng(p[1],p[0]))),strokeOpacity:0,strokeWeight:0,fillColor:'#ffffff',fillOpacity:0.001});
       comparisonLayers.push(polygon);
-      kakao.maps.event.addListener(polygon,'click',()=>{
-        const c=region.composition;
-        const box=document.createElement('div');box.style.cssText='padding:12px;max-width:280px;white-space:normal';
-        box.textContent=region.name+' · 법정동 경계(2023 자료) · '+region.month+' 주민등록 · '+(c?'20~39세 '+c.young_share+'% / 60세 이상 '+c.older_share+'%':'자료 없음');
-        stationInfo.setContent(box);stationInfo.setPosition(position);stationInfo.open(map);
+      kakao.maps.event.addListener(polygon,'click',event=>{
+        showRegionCard(region.name,region.card,(event||{}).latLng||position);
       });
       });
     });
