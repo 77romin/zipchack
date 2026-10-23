@@ -1,5 +1,6 @@
 """선택 법정동 지도 카드. 서로 다른 공간 단위의 통계를 섞지 않는다."""
 import json,math
+from age_colors import age_composition
 from geo import stations_within
 from rent_api import filter_budget
 
@@ -51,4 +52,4 @@ def map_card(neighborhood,result,conditions,bikes,residents,month):
         rates={str(age):round(value/resident['total']*100,1) for age,value in resident['ages'].items() if value is not None}
         text.append(f"주민등록 거주자 {resident['total']:,}명 · 기준월 {resident['month']} · 유동인구 아님")
     else:text.append('주민등록 연령 자료 미조회 · 생활환경 영역에서 조회할 수 있어요')
-    return {'lines':text,'age_rates':rates,'month':month}
+    return {'lines':text,'age_rates':rates,'month':month,'composition':age_composition(rates)}

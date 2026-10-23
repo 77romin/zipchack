@@ -408,7 +408,8 @@ with map_column:
             card=map_card(map_neighborhood,st.session_state.get('rent_result'),st.session_state.get('conversation_conditions') or conditions,
                           bike_result,st.session_state.get('resident_data',{}),map_month)
             st.iframe(
-                build_map_html(kakao_javascript_key, workplace_location, radius_km, map_stations, city_facilities+lifestyle_facilities, map_neighborhood,card,boundaries.get((map_neighborhood or {}).get('legal_code'))),
+                build_map_html(kakao_javascript_key, workplace_location, radius_km, map_stations, city_facilities+lifestyle_facilities, map_neighborhood,card,boundaries.get((map_neighborhood or {}).get('legal_code')),
+                    [region for region in st.session_state.get('map_age_regions',{}).values() if region.get('month')==map_month and region['code'][:5]==str((map_neighborhood or {}).get('legal_code',''))[:5]]),
                 height=575,
             )
         st.caption("파란 원은 직선거리 탐색 범위이며 실제 통근 가능 영역이 아닙니다.")

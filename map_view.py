@@ -4,7 +4,7 @@ import math
 from urllib.parse import quote
 
 
-def build_map_html(javascript_key, workplace=None, radius_km=3.0, stations=None, facilities=None, neighborhood=None, explore=None, geometry=None):
+def build_map_html(javascript_key, workplace=None, radius_km=3.0, stations=None, facilities=None, neighborhood=None, explore=None, geometry=None, age_regions=None):
     radius_km = float(radius_km)
     if not math.isfinite(radius_km) or not 0.5 <= radius_km <= 10:
         raise ValueError("탐색 반경은 0.5~10km여야 합니다.")
@@ -19,7 +19,7 @@ def build_map_html(javascript_key, workplace=None, radius_km=3.0, stations=None,
         if not (math.isfinite(lat) and math.isfinite(lon) and 37<=lat<=38 and 126<=lon<=128):
             raise ValueError('서울 동네의 유효한 좌표가 필요합니다.')
     payload = json.dumps({"center": center, "workplace": bool(workplace),
-                          "explore":explore,"geometry":geometry,"neighborhood": neighborhood, "stations": stations or [], "facilities": facilities or [], "radius_m": round(radius_km * 1000)}, ensure_ascii=False)
+                          "age_regions":age_regions or [],"explore":explore,"geometry":geometry,"neighborhood": neighborhood, "stations": stations or [], "facilities": facilities or [], "radius_m": round(radius_km * 1000)}, ensure_ascii=False)
     # HTML의 script 종료 태그를 데이터로 삽입할 수 없게 한다.
     payload = payload.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
     return TEMPLATE.replace("__KEY__", quote(javascript_key, safe="")).replace("__DATA__", payload)
@@ -32,7 +32,8 @@ TEMPLATE = r'''
 <div style="padding:8px;background:#f1f5f9;color:#0f172a;font-size:13px">
 <label><input type="checkbox" id="layer-bike" checked>따릉이 대여소</label>
 <label><input type="checkbox" id="layer-facility" checked>주변 시설</label>
-<label>연령 비율 <select id="layer-age"><option value="">기본 영역</option><option value="20" selected>20대</option><option value="30">30대</option><option value="40">40대</option><option value="50">50대</option><option value="60">60대</option></select></label>
+<label>연령 지도 <select id="layer-age"><option value="composition" selected>20~39세 ↔ 60세 이상 구성</option><option value="">기본 영역</option><option value="20">20대 비율</option><option value="30">30대 비율</option><option value="40">40대 비율</option><option value="50">50대 비율</option><option value="60">60대 비율</option></select></label>
+<div style="display:flex;align-items:center;gap:8px;margin-top:6px"><span>20~39세 비중 우세</span><span style="display:inline-block;width:130px;height:12px;background:linear-gradient(to right,#16a34a,#facc15,#dc2626)"></span><span>60세 이상 비중 우세</span><span> · 자료 없음: 회색</span></div>
 <span id="age-note">선택 동네의 조회된 주민등록 자료만 표시</span></div>
 <div id="error" role="alert"></div><div id="map" aria-label="직장과 탐색 범위 지도"></div>
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=__KEY__&autoload=false"></script>
@@ -46,9 +47,17 @@ if(window.kakao && window.kakao.maps){
     map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
     const stationInfo = new kakao.maps.InfoWindow({removable:true});
     const bikeLayers=[],facilityLayers=[],areaLayers=[];
+    const comparisonLayers=[];
     document.getElementById('layer-bike').onchange=function(){bikeLayers.forEach(x=>x.setMap(this.checked?map:null));};
     document.getElementById('layer-facility').onchange=function(){facilityLayers.forEach(x=>x.setMap(this.checked?map:null));};
     document.getElementById('layer-age').onchange=function(){
+      comparisonLayers.forEach(x=>x.setMap(this.value==='composition'?map:null));
+      if(this.value==='composition'){
+        const composition=(data.explore||{}).composition;
+        areaLayers.forEach(x=>x.setOptions({fillColor:composition?composition.color:'#94a3b8',fillOpacity:0.48}));
+        document.getElementById('age-note').textContent=composition?'20~39세 '+composition.young_share+'% / 60세 이상 '+composition.older_share+'% · 주민등록 '+data.explore.month:'연령 구성 자료 없음 (회색)';
+        return;
+      }
       const rates=(data.explore||{}).age_rates||{};const value=rates[this.value];
       const known=this.value && value!==undefined;
       const color=this.value?(known?'#7c3aed':'#94a3b8'):'#f97316';
@@ -131,6 +140,20 @@ if(window.kakao && window.kakao.maps){
       else{map.setCenter(position);map.setLevel(5);}
     }
 
+    const ageBounds=new kakao.maps.LatLngBounds();
+    (data.age_regions||[]).forEach(region=>{
+      const position=new kakao.maps.LatLng(region.latitude,region.longitude);ageBounds.extend(position);
+      if(data.neighborhood && region.code===data.neighborhood.legal_code)return;
+      const c=region.composition;
+      const circle=new kakao.maps.Circle({map:map,center:position,radius:350,strokeColor:'#475569',strokeWeight:1,fillColor:c?c.color:'#94a3b8',fillOpacity:0.48});
+      comparisonLayers.push(circle);
+      kakao.maps.event.addListener(circle,'click',()=>{
+        const box=document.createElement('div');box.style.cssText='padding:12px;max-width:280px;white-space:normal';
+        box.textContent=region.name+' · 대표점 주변 350m (실제 경계 아님) · '+region.month+' 주민등록 · '+(c?'20~39세 '+c.young_share+'% / 60세 이상 '+c.older_share+'%':'자료 없음');
+        stationInfo.setContent(box);stationInfo.setPosition(position);stationInfo.open(map);
+      });
+    });
+    if(data.age_regions && data.age_regions.length>1)map.setBounds(ageBounds);
     document.getElementById('layer-age').onchange();
   });
 }else{fail();}

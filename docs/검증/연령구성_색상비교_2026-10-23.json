@@ -1,0 +1,88 @@
+{
+  "exceptions": 0,
+  "metric": "60세이상 / (20~39세 + 60세이상)",
+  "source": "주민등록 거주자",
+  "regions": [
+    {
+      "code": "1114016200",
+      "name": "서울특별시 중구 신당동",
+      "latitude": 37.5620157313143,
+      "longitude": 127.014442188261,
+      "month": "202609",
+      "composition": {
+        "young_share": 27.5,
+        "older_share": 34.4,
+        "older_balance": 0.5564,
+        "color": "#f7b917"
+      }
+    },
+    {
+      "code": "1114010100",
+      "name": "서울특별시 중구 무교동",
+      "latitude": 37.5681523321123,
+      "longitude": 126.978995985222,
+      "month": "202609",
+      "composition": {
+        "young_share": 0.0,
+        "older_share": 60.0,
+        "older_balance": 1.0,
+        "color": "#dc2626"
+      }
+    },
+    {
+      "code": "1114010200",
+      "name": "서울특별시 중구 다동",
+      "latitude": 37.5678932127316,
+      "longitude": 126.981173875618,
+      "month": "202609",
+      "composition": {
+        "young_share": 10.0,
+        "older_share": 63.3,
+        "older_balance": 0.8636,
+        "color": "#e45321"
+      }
+    },
+    {
+      "code": "1114010300",
+      "name": "서울특별시 중구 태평로1가",
+      "latitude": 37.5677087157563,
+      "longitude": 126.977234843742,
+      "month": "202609",
+      "composition": {
+        "young_share": 0.0,
+        "older_share": 66.7,
+        "older_balance": 1.0,
+        "color": "#dc2626"
+      }
+    },
+    {
+      "code": "1114010500",
+      "name": "서울특별시 중구 을지로2가",
+      "latitude": 37.5658609834047,
+      "longitude": 126.984004114817,
+      "month": "202609",
+      "composition": {
+        "young_share": 35.2,
+        "older_share": 27.8,
+        "older_balance": 0.4412,
+        "color": "#dfc71b"
+      }
+    },
+    {
+      "code": "1114010700",
+      "name": "서울특별시 중구 삼각동",
+      "latitude": 37.568081067024,
+      "longitude": 126.984225497316,
+      "month": "202609",
+      "composition": {
+        "young_share": 0.0,
+        "older_share": 100.0,
+        "older_balance": 1.0,
+        "color": "#dc2626"
+      }
+    }
+  ],
+  "warnings": [
+    "자료 확인 실패: 서울특별시 중구 을지로1가, 서울특별시 중구 남대문로1가"
+  ]
+}
